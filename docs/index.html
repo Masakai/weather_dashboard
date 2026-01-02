@@ -60,7 +60,7 @@
                 <div id="current-clock" class="text-xl font-semibold font-mono">--:--:--</div>
                 <div class="text-slate-400 text-sm">現在時刻 (Asia/Tokyo)</div>
                 <div class="text-slate-500 text-xs mt-2">
-                    Ver. 1.2.6 (Update: 2026/01/02)
+                    Ver. 1.3.0 (Update: 2026/01/02)
                 </div>
             </div>
         </header>
@@ -488,8 +488,46 @@
                 if(tempDiff > 2) summary += " その後、気温は上昇傾向です。";
                 else if(tempDiff < -2) summary += " その後、冷え込む見込みです。";
             }
+
+            // --- 天体観測サマリー追加 ---
+            // 選択された日時の「夜間（20:00 - 翌04:00）」のデータを取得
+            let astroStart = targetMoment.clone().startOf('day').add(20, 'hours');
+            // もし選択時間が深夜(00:00-04:00)なら、昨日の20:00からスタートとみなす（その夜のことなので）
+            if (targetMoment.hour() < 4) {
+                astroStart.subtract(1, 'days');
+            }
             
-            document.getElementById('forecast-summary').innerText = summary;
+            const astroEnd = astroStart.clone().add(8, 'hours'); // 20:00 -> 04:00 (8時間)
+            
+            let astroCloudSum = 0;
+            let astroCount = 0;
+            
+            hourly.time.forEach((t, i) => {
+                const time = moment(t);
+                if (time.isSameOrAfter(astroStart) && time.isBefore(astroEnd)) {
+                    astroCloudSum += hourly.cloud_cover[i];
+                    astroCount++;
+                }
+            });
+
+            if (astroCount > 0) {
+                const avgAstroCloud = astroCloudSum / astroCount;
+                summary += "<br><br><strong>🔭 天体観測予報:</strong> ";
+                const dateStr = astroStart.format('M/D');
+                
+                if (avgAstroCloud < 15) {
+                    summary += `${dateStr}の夜は、雲が少なく<strong>絶好の天体観測日和</strong>です。星空が期待できます。`;
+                } else if (avgAstroCloud < 40) {
+                    summary += `${dateStr}の夜は、雲は少なめで<strong>観測に適しています</strong>。`;
+                } else if (avgAstroCloud < 75) {
+                    summary += `${dateStr}の夜は、雲が出るため観測には<strong>忍耐が必要</strong>かもしれません。`;
+                } else {
+                    summary += `${dateStr}の夜は、雲が多く<strong>観測には不向き</strong>な予報です。`;
+                }
+            }
+            
+            // innerText -> innerHTML (タグを有効化するため)
+            document.getElementById('forecast-summary').innerHTML = summary;
 
             // チャート描画
             const sliceStart = currentIndex;
