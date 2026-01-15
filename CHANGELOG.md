@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.9] - 2026-01-15
+
+### Added
+- 天体イベント情報に「天文イベント（月食・日食）」パネルを追加
+- 前後180日間の月食・日食を自動検索して表示
+- イベントの種類（皆既・部分・半影月食、皆既・金環・部分日食）を表示
+- イベントまでの日数を表示（今日/○日後/○日前）
+- 30日以内のイベントには「近日開催」マークを表示
+
+### Improved
+- astronomy-engineライブラリを活用した高精度な天文イベント計算
+- 過去のイベントは薄い色で表示し、未来のイベントを強調
+
 ## [2.3.8] - 2026-01-15
 
 ### Changed
