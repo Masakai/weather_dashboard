@@ -1,10 +1,10 @@
 # 🌟 天体観測できるかな？
 
-**バージョン 2.2.1**
+**バージョン 2.3.0**
 
 天体観測に最適な条件を総合判定する、インタラクティブな気象ダッシュボードです。雲量・月明かり・湿度・視程・風速などを総合的に評価し、星空観測の成功率を高めます。
 
-![Version](https://img.shields.io/badge/version-2.2.1-blue)
+![Version](https://img.shields.io/badge/version-2.3.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -125,16 +125,22 @@ astronomy-engine.jsによる高精度計算:
 
 ### 8. 天体イベント情報 🌟
 
-#### 8-1. 今夜見える惑星 🪐
+#### 8-1. ISS（国際宇宙ステーション）追跡 🛰️
+- TLE（Two-Line Element）データから軌道を計算
+- CelesTrakからリアルタイムでTLEを取得
+- 現在のISS位置（緯度・経度・高度）を表示
+- 観測地点からの可視予報（次回可視時刻・最大高度・方位）
+
+#### 8-2. 今夜見える惑星 🪐
 - 水星・金星・火星・木星・土星
 - 高度・方位・等級をリアルタイム表示
 
-#### 8-2. 流星群カレンダー ☄️
+#### 8-3. 流星群カレンダー ☄️
 - 主要8流星群を網羅
 - 極大日は特別ハイライト
 - 前後30日以内の流星群を自動表示
 
-#### 8-3. 月齢による観測推奨天体 🔭
+#### 8-4. 月齢による観測推奨天体 🔭
 - **新月期**: アンドロメダ銀河、オリオン大星雲など
 - **満月期**: 月面地形観測
 - **上弦/下弦**: 月面クレーター、惑星
@@ -151,6 +157,7 @@ astronomy-engine.jsによる高精度計算:
 | ライブラリ | バージョン | 用途 |
 |-----------|-----------|------|
 | [astronomy-engine.js](https://github.com/cosinekitty/astronomy) | 2.1.19 | 惑星位置・天文薄明計算 |
+| [satellite.js](https://github.com/shashwatak/satellite-js) | 5.0.0 | ISS軌道計算（TLE処理） |
 | [Chart.js](https://www.chartjs.org/) | latest | グラフ描画 |
 | [Moment.js](https://momentjs.com/) | 2.29.4 | 日時操作 |
 | [Leaflet](https://leafletjs.com/) | 1.9.4 | 地図表示 |
@@ -161,6 +168,7 @@ astronomy-engine.jsによる高精度計算:
 |-----|------|
 | [Open-Meteo](https://open-meteo.com/) | 気象データ取得 |
 | [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org/) | 逆ジオコーディング |
+| [CelesTrak](https://celestrak.org/) | ISS TLEデータ取得 |
 
 ---
 
@@ -250,14 +258,19 @@ daily=weathercode,temperature_2m_max,temperature_2m_min,
 
 ## 📝 バージョン履歴
 
+### v2.3.0 (2026-01-15)
+**マイナーアップデート**
+
+- 🛰️ TLEベースのISS追跡機能を実装（satellite.jsライブラリ使用）
+- 📡 CelesTrakからリアルタイムでTLEデータを取得
+- 👁️ ISS可視予報機能を追加（観測地点からの可視性を計算）
+- 🎨 天体イベント情報をアコーディオン表示に変更（省スペース化）
+- 📦 4つのパネル（ISS、惑星、流星群、推奨天体）を折りたたみ可能に
+
 ### v2.2.1 (2026-01-15)
 **パッチアップデート**
 
-- 🎨 天体イベント情報パネルをアコーディオン表示に変更
-- 📦 3つの天体イベントパネル（惑星、流星群、推奨天体）を折りたたみ可能に
-- 💡 デフォルトで全パネルを折りたたみ、必要な情報だけを展開可能
-- 🎯 縦スペースを大幅に削減し、UIの見通しを改善
-- 🗑️ ISS関連機能（現在位置・乗員情報）を削除（API不安定のため）
+- 🗑️ Open Notify API依存のISS機能を一時削除（API不安定のため）
 
 ### v2.0.0 (2026-01-14)
 **メジャーアップデート**
