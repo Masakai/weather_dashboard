@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.5] - 2026-01-15
+
+### Changed
+- 観測期間を日没～日の出から、天文薄明終了～天文薄明開始に変更
+- 星空視認性スコアを天文薄明終了から天文薄明開始までの平均雲量で計算
+- 天体観測予報の時間帯別評価も天文薄明基準に変更
+
+### Fixed
+- 日没直後（まだ空が明るい時間帯）が観測期間に含まれていた問題を修正
+- 時間帯別雲量と星空視認性スコアの不一致問題を改善
+
+### Added
+- デバッグログ機能を追加（開発者ツールのコンソールで計算値を確認可能）
+
+### Improved
+- 実際の天体観測の実態（天文薄明終了後から本格的な観測が可能）に合わせた評価
+
 ## [2.3.4] - 2026-01-15
 
 ### Changed
