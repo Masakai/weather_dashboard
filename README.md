@@ -1,10 +1,10 @@
 # 🌟 天体観測できるかな？
 
-**バージョン 2.6.0**
+**バージョン 2.6.1**
 
 天体観測に最適な条件を総合判定する、インタラクティブな気象ダッシュボードです。雲量・月明かり・湿度・視程・風速などを総合的に評価し、星空観測の成功率を高めます。
 
-![Version](https://img.shields.io/badge/version-2.6.0-blue)
+![Version](https://img.shields.io/badge/version-2.6.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -270,6 +270,12 @@ daily=weathercode,temperature_2m_max,temperature_2m_min,
 ---
 
 ## 📝 バージョン履歴
+
+### v2.6.1 (2026-01-15)
+**パッチアップデート**
+
+- 🐛 ISS星座図表示時に「ISS情報が取得できていません」と表示される問題を修正
+- 🔧 issTLE変数をwindow.currentTLEにも保存するように修正
 
 ### v2.6.0 (2026-01-15)
 **マイナーアップデート**
