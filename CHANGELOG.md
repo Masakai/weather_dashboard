@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.3] - 2026-01-15
+
+### Changed
+- 天体観測予報の評価基準をより厳格化（絶好: 10%未満、良好: 25%未満、やや雲多: 50%未満、不向き: 50%以上）
+- 天体観測予報に時間帯別の詳細評価を追加（20-22時、22-24時、0-2時、2-4時の4つの時間帯で雲量と評価を表示）
+- 星空視認性スコアの計算を、指定時刻の雲量から夜間平均雲量（20:00-04:00）ベースに変更
+- レーダーチャートの「雲晴れ度」も夜間平均雲量を使用するように変更
+
+### Fixed
+- 雲量推移グラフと天体観測評価が食い違う問題を解決
+- 雲が多い状況でも「観測に適している」と高評価になっていた問題を修正
+- 時間帯によって雲量が大きく変動する場合でも、実態に即した評価を表示
+
 ## [2.3.2] - 2026-01-15
 
 ### Fixed

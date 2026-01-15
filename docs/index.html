@@ -107,7 +107,7 @@
                 <div id="current-clock" class="text-xl font-semibold font-mono">--:--:--</div>
                 <div class="text-slate-400 text-sm">現在時刻 (Asia/Tokyo)</div>
                 <div class="text-slate-500 text-xs mt-2 flex items-center gap-2">
-                    Ver. 2.3.2
+                    Ver. 2.3.3
                     <button onclick="toggleNightVision()" class="text-xs bg-red-900/30 hover:bg-red-800/50 px-2 py-1 rounded border border-red-600/30" title="ナイトビジョンモード">
                         <i data-lucide="moon" class="w-3 h-3 inline"></i>
                     </button>
@@ -1519,13 +1519,30 @@
             updateSunMoonDisplay(sunMoonTimes);
             renderTimeline(sunMoonTimes, targetDate);
 
-            // 星空視認性スコアの計算
-            const starryScore = calculateStarryScore(currentCloudTotal, moonData.age, currentHumidity, parseFloat(currentVisibility), currentWindSpeed);
+            // 夜間平均雲量の計算（星空視認性スコアに使用）
+            // 選択された日時の「夜間（20:00 - 翌04:00）」のデータを取得
+            let nightStart = targetMoment.clone().startOf('day').add(20, 'hours');
+            const nightEnd = nightStart.clone().add(8, 'hours');
+            let nightCloudSum = 0;
+            let nightCloudCount = 0;
+
+            hourly.time.forEach((t, i) => {
+                const time = moment(t);
+                if (time.isSameOrAfter(nightStart) && time.isBefore(nightEnd)) {
+                    nightCloudSum += hourly.cloud_cover[i];
+                    nightCloudCount++;
+                }
+            });
+
+            const avgNightCloud = nightCloudCount > 0 ? nightCloudSum / nightCloudCount : currentCloudTotal;
+
+            // 星空視認性スコアの計算（夜間平均雲量を使用）
+            const starryScore = calculateStarryScore(avgNightCloud, moonData.age, currentHumidity, parseFloat(currentVisibility), currentWindSpeed);
             updateStarryScore(starryScore);
 
-            // レーダーチャートのデータ準備
+            // レーダーチャートのデータ準備（夜間平均雲量を使用）
             const radarData = {
-                cloudClearness: Math.max(0, 100 - currentCloudTotal),
+                cloudClearness: Math.max(0, 100 - avgNightCloud),
                 moonDarkness: moonData.age < 3 || moonData.age > 26 ? 100 : moonData.age < 10 || moonData.age > 18 ? 60 : 20,
                 lowHumidity: Math.max(0, 100 - currentHumidity),
                 goodVisibility: Math.min(100, (parseFloat(currentVisibility) / 50) * 100),
@@ -1554,17 +1571,47 @@
             // 選択された日時の「夜間（20:00 - 翌04:00）」のデータを取得
             let astroStart = targetMoment.clone().startOf('day').add(20, 'hours');
             // 修正: 深夜でも「その日の20時〜」を対象にするため、深夜補正ロジックを削除
-            
+
             const astroEnd = astroStart.clone().add(8, 'hours'); // 20:00 -> 04:00 (8時間)
-            
+
+            // 時間帯別の雲量データを収集（2時間ごと）
+            const timeSlots = [
+                { start: 20, end: 22, label: '20-22時', clouds: [], sum: 0, count: 0 },
+                { start: 22, end: 24, label: '22-24時', clouds: [], sum: 0, count: 0 },
+                { start: 0, end: 2, label: '0-2時', clouds: [], sum: 0, count: 0 },
+                { start: 2, end: 4, label: '2-4時', clouds: [], sum: 0, count: 0 }
+            ];
+
             let astroCloudSum = 0;
             let astroCount = 0;
-            
+
             hourly.time.forEach((t, i) => {
                 const time = moment(t);
                 if (time.isSameOrAfter(astroStart) && time.isBefore(astroEnd)) {
+                    const hourOfDay = time.hour();
                     astroCloudSum += hourly.cloud_cover[i];
                     astroCount++;
+
+                    // 各時間帯に分類
+                    timeSlots.forEach(slot => {
+                        if (slot.start < 24) {
+                            // 当日の時間帯（20-22時, 22-24時）
+                            if (hourOfDay >= slot.start && hourOfDay < slot.end) {
+                                slot.clouds.push(hourly.cloud_cover[i]);
+                                slot.sum += hourly.cloud_cover[i];
+                                slot.count++;
+                            }
+                        } else {
+                            // 翌日の時間帯（0-2時, 2-4時）
+                            const adjustedStart = slot.start % 24;
+                            const adjustedEnd = slot.end % 24;
+                            if (hourOfDay >= adjustedStart && hourOfDay < adjustedEnd) {
+                                slot.clouds.push(hourly.cloud_cover[i]);
+                                slot.sum += hourly.cloud_cover[i];
+                                slot.count++;
+                            }
+                        }
+                    });
                 }
             });
 
@@ -1572,22 +1619,47 @@
                 const avgAstroCloud = astroCloudSum / astroCount;
                 summary += "<br><br><strong>🔭 天体観測予報:</strong> ";
                 const dateStr = astroStart.format('M/D');
-                
+
                 // 月の影響を加味したコメント
                 let moonComment = "";
                 if (moonData.age > 10 && moonData.age < 18) {
-                    moonComment = "ただし、月明かりの影響が大きいでしょう。";
+                    moonComment = " <span class='text-yellow-400'>※月明かりの影響大</span>";
                 }
 
-                if (avgAstroCloud < 15) {
-                    summary += `${dateStr}の夜は、雲が少なく<strong>絶好の天体観測日和</strong>です。${moonComment}`;
-                } else if (avgAstroCloud < 40) {
-                    summary += `${dateStr}の夜は、雲は少なめで<strong>観測に適しています</strong>。${moonComment}`;
-                } else if (avgAstroCloud < 75) {
-                    summary += `${dateStr}の夜は、雲が出るため観測には<strong>忍耐が必要</strong>かもしれません。`;
+                // より厳しい閾値での全体評価
+                if (avgAstroCloud < 10) {
+                    summary += `${dateStr}の夜は、雲が少なく<strong class='text-green-400'>絶好の天体観測日和</strong>です。${moonComment}`;
+                } else if (avgAstroCloud < 25) {
+                    summary += `${dateStr}の夜は、<strong class='text-blue-400'>観測に適しています</strong>。${moonComment}`;
+                } else if (avgAstroCloud < 50) {
+                    summary += `${dateStr}の夜は、<strong class='text-orange-400'>やや雲が多め</strong>です。雲の切れ間を狙いましょう。`;
                 } else {
-                    summary += `${dateStr}の夜は、雲が多く<strong>観測には不向き</strong>な予報です。`;
+                    summary += `${dateStr}の夜は、雲が多く<strong class='text-red-400'>観測には不向き</strong>な予報です。`;
                 }
+
+                // 時間帯別の詳細評価
+                summary += "<br><span class='text-sm text-slate-400'>時間帯別: </span>";
+                timeSlots.forEach(slot => {
+                    if (slot.count > 0) {
+                        const avg = slot.sum / slot.count;
+                        let rating = '';
+                        let color = '';
+                        if (avg < 10) {
+                            rating = '◎';
+                            color = 'text-green-400';
+                        } else if (avg < 25) {
+                            rating = '○';
+                            color = 'text-blue-400';
+                        } else if (avg < 50) {
+                            rating = '△';
+                            color = 'text-orange-400';
+                        } else {
+                            rating = '✕';
+                            color = 'text-red-400';
+                        }
+                        summary += `<span class='text-sm ${color}'>${slot.label}${rating}(${Math.round(avg)}%)</span> `;
+                    }
+                });
             }
             
             // innerText -> innerHTML (タグを有効化するため)
