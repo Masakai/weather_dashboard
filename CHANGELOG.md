@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.2] - 2026-01-15
+
+### Fixed
+- ISS星座図描画時に「エラーが発生しました」と表示される問題を修正
+- satellite.jsのAPI呼び出しを正しい形式に修正
+- observerGdの定義をlongitudeを先にする形式に統一
+- satellite.degreesToRadians()、satellite.radiansToDegrees()などの専用関数を使用
+
 ## [2.6.1] - 2026-01-15
 
 ### Fixed
