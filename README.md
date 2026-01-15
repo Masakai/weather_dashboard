@@ -134,9 +134,10 @@ astronomy-engine.jsによる高精度計算:
 - 極大日は特別ハイライト
 - 前後30日以内の流星群を自動表示
 
-#### 8-3. ISS通過予報 🛰️
+#### 8-3. ISS現在位置 🛰️
 - Open Notify API でリアルタイム取得
-- 次の3回の通過時刻と継続時間
+- ISSの現在の緯度・経度をリアルタイム表示
+- タイムスタンプ付きで更新時刻を表示
 
 #### 8-4. ISS乗員情報 👨‍🚀
 - 現在ISSに滞在中の宇宙飛行士の人数を表示
@@ -260,7 +261,11 @@ daily=weathercode,temperature_2m_max,temperature_2m_min,
 
 **エンドポイント:**
 ```
-http://api.open-notify.org/iss-pass.json?lat={lat}&lon={lon}&n=5
+# ISS現在位置
+http://api.open-notify.org/iss-now.json
+
+# 宇宙飛行士情報
+http://api.open-notify.org/astros.json
 ```
 
 **制限:**
@@ -275,7 +280,9 @@ http://api.open-notify.org/iss-pass.json?lat={lat}&lon={lon}&n=5
 
 - ✨ ISS乗員情報表示機能追加
 - 📊 現在ISSに滞在中の宇宙飛行士の人数と名前をリアルタイム表示
-- 🛰️ Open Notify API の /astros.json エンドポイント統合
+- 🛰️ ISS現在位置表示機能追加（緯度・経度をリアルタイム表示）
+- 🔄 ISS通過予報をISS現在位置に変更（APIエンドポイント更新）
+- 📡 Open Notify API の /iss-now.json および /astros.json エンドポイント統合
 
 ### v2.0.0 (2026-01-14)
 **メジャーアップデート**
