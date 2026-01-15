@@ -1,10 +1,10 @@
 # 🌟 天体観測できるかな？
 
-**バージョン 2.1.0**
+**バージョン 2.2.0**
 
 天体観測に最適な条件を総合判定する、インタラクティブな気象ダッシュボードです。雲量・月明かり・湿度・視程・風速などを総合的に評価し、星空観測の成功率を高めます。
 
-![Version](https://img.shields.io/badge/version-2.1.0-blue)
+![Version](https://img.shields.io/badge/version-2.2.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -275,14 +275,20 @@ http://api.open-notify.org/astros.json
 
 ## 📝 バージョン履歴
 
+### v2.2.0 (2026-01-15)
+**マイナーアップデート**
+
+- 🔄 ISS通過予報をISS現在位置表示に完全移行
+- 🛰️ Open Notify API エンドポイントを /iss-pass.json から /iss-now.json に変更
+- 📡 リアルタイムISS位置情報（緯度・経度・タイムスタンプ）を表示
+- 📝 README.md の API ドキュメントを更新（稼働中のエンドポイントに対応）
+
 ### v2.1.0 (2026-01-14)
 **マイナーアップデート**
 
 - ✨ ISS乗員情報表示機能追加
 - 📊 現在ISSに滞在中の宇宙飛行士の人数と名前をリアルタイム表示
-- 🛰️ ISS現在位置表示機能追加（緯度・経度をリアルタイム表示）
-- 🔄 ISS通過予報をISS現在位置に変更（APIエンドポイント更新）
-- 📡 Open Notify API の /iss-now.json および /astros.json エンドポイント統合
+- 📡 Open Notify API の /astros.json エンドポイント統合
 
 ### v2.0.0 (2026-01-14)
 **メジャーアップデート**
