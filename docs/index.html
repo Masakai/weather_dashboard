@@ -107,7 +107,7 @@
                 <div id="current-clock" class="text-xl font-semibold font-mono">--:--:--</div>
                 <div class="text-slate-400 text-sm">現在時刻 (Asia/Tokyo)</div>
                 <div class="text-slate-500 text-xs mt-2 flex items-center gap-2">
-                    Ver. 2.3.4
+                    Ver. 2.3.5
                     <button onclick="toggleNightVision()" class="text-xs bg-red-900/30 hover:bg-red-800/50 px-2 py-1 rounded border border-red-600/30" title="ナイトビジョンモード">
                         <i data-lucide="moon" class="w-3 h-3 inline"></i>
                     </button>
@@ -1520,13 +1520,18 @@
             renderTimeline(sunMoonTimes, targetDate);
 
             // 夜間平均雲量の計算（星空視認性スコアに使用）
-            // 日没から翌日の日の出までのデータを取得
-            const nightStart = sunMoonTimes.sunsetDate ? moment(sunMoonTimes.sunsetDate) : targetMoment.clone().startOf('day').add(18, 'hours');
+            // 天文薄明終了（夜）から翌日の天文薄明開始（朝）までのデータを取得
+            // 実際の天体観測は、日没後ではなく天文薄明終了後から本格化するため
+            const nightStart = sunMoonTimes.astroEndDate ? moment(sunMoonTimes.astroEndDate) :
+                              sunMoonTimes.sunsetDate ? moment(sunMoonTimes.sunsetDate).add(1, 'hour') :
+                              targetMoment.clone().startOf('day').add(19, 'hours');
 
-            // 翌日の日の出時刻を取得
+            // 翌日の天文薄明開始時刻を取得
             const nextDay = moment(targetDate).add(1, 'day').startOf('day').toDate();
             const nextDaySunMoonTimes = calculateSunMoonTimes(nextDay, currentLat, currentLon);
-            const nightEnd = nextDaySunMoonTimes.sunriseDate ? moment(nextDaySunMoonTimes.sunriseDate) : nightStart.clone().add(12, 'hours');
+            const nightEnd = nextDaySunMoonTimes.astroBeginDate ? moment(nextDaySunMoonTimes.astroBeginDate) :
+                            nextDaySunMoonTimes.sunriseDate ? moment(nextDaySunMoonTimes.sunriseDate).subtract(1, 'hour') :
+                            nightStart.clone().add(10, 'hours');
 
             let nightCloudSum = 0;
             let nightCloudCount = 0;
@@ -1541,9 +1546,23 @@
 
             const avgNightCloud = nightCloudCount > 0 ? nightCloudSum / nightCloudCount : currentCloudTotal;
 
+            // デバッグログ
+            console.log('=== 星空視認性スコア計算デバッグ ===');
+            console.log('観測期間:', nightStart.format('HH:mm'), '～', nightEnd.format('HH:mm'));
+            console.log('データ数:', nightCloudCount);
+            console.log('平均雲量:', avgNightCloud.toFixed(1), '%');
+            console.log('雲量スコア:', Math.max(0, 100 - avgNightCloud).toFixed(1));
+            console.log('月齢:', moonData.age);
+            console.log('湿度:', currentHumidity, '%');
+            console.log('視程:', currentVisibility, 'km');
+            console.log('風速:', currentWindSpeed, 'm/s');
+
             // 星空視認性スコアの計算（夜間平均雲量を使用）
             const starryScore = calculateStarryScore(avgNightCloud, moonData.age, currentHumidity, parseFloat(currentVisibility), currentWindSpeed);
             updateStarryScore(starryScore);
+
+            console.log('最終スコア:', starryScore);
+            console.log('=====================================');
 
             // レーダーチャートのデータ準備（夜間平均雲量を使用）
             const radarData = {
