@@ -107,7 +107,7 @@
                 <div id="current-clock" class="text-xl font-semibold font-mono">--:--:--</div>
                 <div class="text-slate-400 text-sm">現在時刻 (Asia/Tokyo)</div>
                 <div class="text-slate-500 text-xs mt-2 flex items-center gap-2">
-                    Ver. 2.6.3
+                    Ver. 2.7.0
                     <button onclick="toggleNightVision()" class="text-xs bg-red-900/30 hover:bg-red-800/50 px-2 py-1 rounded border border-red-600/30" title="ナイトビジョンモード">
                         <i data-lucide="moon" class="w-3 h-3 inline"></i>
                     </button>
@@ -403,6 +403,22 @@
                                 </div>
                                 <div id="iss-prediction-content" class="bg-blue-900/30 rounded-lg p-2 text-xs text-blue-200">
                                     条件を確認中...
+                                </div>
+                            </div>
+
+                            <!-- 次回パス予測 -->
+                            <div class="mt-3 pt-3 border-t border-slate-700 space-y-2 text-sm">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2 text-green-400">
+                                        <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                                        <span class="font-bold">次回パス予測（7日間）</span>
+                                    </div>
+                                    <button onclick="calculateISSPasses()" class="text-xs text-blue-300 hover:text-blue-200 underline">
+                                        再計算
+                                    </button>
+                                </div>
+                                <div id="iss-passes-list" class="space-y-1 max-h-64 overflow-y-auto">
+                                    <div class="text-slate-400 text-xs">計算中...</div>
                                 </div>
                             </div>
                         </div>
@@ -1294,6 +1310,169 @@
                 console.error('ISS計算エラー:', error);
                 container.innerHTML = '<div class="text-red-400">ISS情報の計算に失敗しました</div>';
             }
+
+            // 初回のみパス予測を自動計算
+            if (!window.issPassesCalculated) {
+                calculateISSPasses();
+                window.issPassesCalculated = true;
+            }
+        }
+
+        // ISS次回パス予測を計算
+        let calculatedPasses = [];
+        function calculateISSPasses() {
+            const container = document.getElementById('iss-passes-list');
+            container.innerHTML = '<div class="text-slate-400 text-xs">計算中...</div>';
+
+            try {
+                if (!window.currentTLE || !currentLat || !currentLon) {
+                    container.innerHTML = '<div class="text-red-400 text-xs">TLEデータが取得できていません</div>';
+                    return;
+                }
+
+                const passes = [];
+                const now = new Date();
+                const endTime = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7日後まで
+                const interval = 60 * 1000; // 1分刻み
+
+                const satrec = satellite.twoline2satrec(window.currentTLE.line1, window.currentTLE.line2);
+
+                let currentPass = null;
+                let maxElevation = -90;
+                let maxElevationTime = null;
+                let maxDistance = 0;
+
+                for (let time = now.getTime(); time <= endTime.getTime(); time += interval) {
+                    const date = new Date(time);
+                    const positionAndVelocity = satellite.propagate(satrec, date);
+
+                    if (positionAndVelocity.position && typeof positionAndVelocity.position !== 'boolean') {
+                        const positionEci = positionAndVelocity.position;
+                        const gmst = satellite.gstime(date);
+
+                        const observerGd = {
+                            longitude: satellite.degreesToRadians(currentLon),
+                            latitude: satellite.degreesToRadians(currentLat),
+                            height: 0
+                        };
+
+                        const positionEcf = satellite.eciToEcf(positionEci, gmst);
+                        const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
+
+                        const elevation = satellite.radiansToDegrees(lookAngles.elevation);
+                        const azimuth = satellite.radiansToDegrees(lookAngles.azimuth);
+                        const distance = lookAngles.rangeSat;
+
+                        if (elevation > 0) {
+                            // パス中
+                            if (!currentPass) {
+                                // 新しいパス開始
+                                currentPass = {
+                                    startTime: date,
+                                    startElevation: elevation,
+                                    startAzimuth: azimuth
+                                };
+                                maxElevation = elevation;
+                                maxElevationTime = date;
+                                maxDistance = distance;
+                            } else {
+                                // パス継続中、最大高度を更新
+                                if (elevation > maxElevation) {
+                                    maxElevation = elevation;
+                                    maxElevationTime = date;
+                                    maxDistance = distance;
+                                }
+                            }
+                        } else {
+                            // 地平線下
+                            if (currentPass) {
+                                // パス終了
+                                currentPass.endTime = new Date(time - interval); // 1分前
+                                currentPass.maxElevation = maxElevation;
+                                currentPass.maxElevationTime = maxElevationTime;
+                                currentPass.maxDistance = maxDistance;
+
+                                // 最大高度が10度以上のパスのみ記録
+                                if (maxElevation >= 10) {
+                                    passes.push(currentPass);
+                                }
+
+                                currentPass = null;
+                                maxElevation = -90;
+                            }
+                        }
+                    }
+                }
+
+                // 保存
+                calculatedPasses = passes;
+
+                // 表示
+                if (passes.length === 0) {
+                    container.innerHTML = '<div class="text-slate-400 text-xs">今後7日間に観測可能なパスはありません（最大高度10°以上）</div>';
+                } else {
+                    container.innerHTML = passes.map((pass, index) => {
+                        const duration = (pass.endTime - pass.startTime) / 1000 / 60; // 分単位
+                        const startStr = moment(pass.startTime).format('M/D HH:mm');
+                        const maxStr = moment(pass.maxElevationTime).format('HH:mm');
+
+                        // 高度による評価
+                        let quality = '';
+                        let qualityColor = '';
+                        if (pass.maxElevation >= 60) {
+                            quality = '最適';
+                            qualityColor = 'text-yellow-300';
+                        } else if (pass.maxElevation >= 40) {
+                            quality = '良好';
+                            qualityColor = 'text-green-300';
+                        } else if (pass.maxElevation >= 20) {
+                            quality = '可';
+                            qualityColor = 'text-blue-300';
+                        } else {
+                            quality = '低';
+                            qualityColor = 'text-slate-400';
+                        }
+
+                        return `
+                            <div class="bg-slate-700/30 rounded-lg p-2 hover:bg-slate-700/50 transition cursor-pointer" onclick="showPassOnSkymap(${index})">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="font-semibold text-white text-xs">${startStr}</div>
+                                    <div class="${qualityColor} text-xs font-bold">${quality}</div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-1 text-[10px]">
+                                    <div>
+                                        <span class="text-slate-400">最大高度:</span>
+                                        <span class="text-white font-semibold">${pass.maxElevation.toFixed(1)}°</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400">時刻:</span>
+                                        <span class="text-white">${maxStr}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400">距離:</span>
+                                        <span class="text-white">${(pass.maxDistance).toFixed(0)}km</span>
+                                    </div>
+                                </div>
+                                <div class="text-[10px] text-slate-500 mt-1">
+                                    継続時間: ${duration.toFixed(0)}分 | クリックで軌道表示
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+            } catch (error) {
+                console.error('パス計算エラー:', error);
+                container.innerHTML = '<div class="text-red-400 text-xs">計算エラー: ' + error.message + '</div>';
+            }
+        }
+
+        // パスを星図に表示
+        function showPassOnSkymap(passIndex) {
+            if (passIndex < 0 || passIndex >= calculatedPasses.length) return;
+
+            window.selectedPass = calculatedPasses[passIndex];
+            openISSSkymapModal();
         }
 
         // 1. 今夜見える惑星を計算
@@ -2401,7 +2580,77 @@
                     ctx.fillText(star.name, pos.x + 5, pos.y + 3);
                 });
 
-                // ISSの地平座標を計算
+                // 選択されたパスの軌道を描画
+                if (window.selectedPass) {
+                    const pass = window.selectedPass;
+                    const satrec = satellite.twoline2satrec(window.currentTLE.line1, window.currentTLE.line2);
+                    const passPoints = [];
+
+                    // パスの軌道を計算（30秒刻み）
+                    for (let time = pass.startTime.getTime(); time <= pass.endTime.getTime(); time += 30000) {
+                        const date = new Date(time);
+                        const positionAndVelocity = satellite.propagate(satrec, date);
+
+                        if (positionAndVelocity.position && typeof positionAndVelocity.position !== 'boolean') {
+                            const positionEci = positionAndVelocity.position;
+                            const gmst = satellite.gstime(date);
+
+                            const observerGd = {
+                                longitude: satellite.degreesToRadians(currentLon),
+                                latitude: satellite.degreesToRadians(currentLat),
+                                height: 0
+                            };
+
+                            const positionEcf = satellite.eciToEcf(positionEci, gmst);
+                            const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
+
+                            const azimuth = satellite.radiansToDegrees(lookAngles.azimuth);
+                            const elevation = satellite.radiansToDegrees(lookAngles.elevation);
+
+                            if (elevation > 0) {
+                                passPoints.push({ azimuth, elevation, time: date });
+                            }
+                        }
+                    }
+
+                    // 軌道を線で描画
+                    if (passPoints.length > 1) {
+                        ctx.strokeStyle = '#3b82f6';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([5, 3]);
+                        ctx.beginPath();
+
+                        const firstPoint = azAltToCanvas(passPoints[0].azimuth, passPoints[0].elevation);
+                        ctx.moveTo(firstPoint.x, firstPoint.y);
+
+                        for (let i = 1; i < passPoints.length; i++) {
+                            const point = azAltToCanvas(passPoints[i].azimuth, passPoints[i].elevation);
+                            ctx.lineTo(point.x, point.y);
+                        }
+
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+
+                        // 軌道上の点を描画（5分刻み）
+                        passPoints.forEach((point, index) => {
+                            if (index % 10 === 0) { // 30秒×10 = 5分
+                                const pos = azAltToCanvas(point.azimuth, point.elevation);
+                                ctx.fillStyle = '#60a5fa';
+                                ctx.beginPath();
+                                ctx.arc(pos.x, pos.y, 3, 0, 2 * Math.PI);
+                                ctx.fill();
+
+                                // 時刻を表示
+                                ctx.fillStyle = '#93c5fd';
+                                ctx.font = '9px sans-serif';
+                                ctx.textAlign = 'left';
+                                ctx.fillText(moment(point.time).format('HH:mm'), pos.x + 5, pos.y - 5);
+                            }
+                        });
+                    }
+                }
+
+                // ISSの現在位置を計算
                 const satrec = satellite.twoline2satrec(window.currentTLE.line1, window.currentTLE.line2);
                 const positionAndVelocity = satellite.propagate(satrec, targetDate);
 
@@ -2469,7 +2718,48 @@
 
                 // 情報パネルを更新
                 const infoDiv = document.getElementById('iss-skymap-info');
-                if (issVisible) {
+
+                if (window.selectedPass) {
+                    // 選択されたパスの情報を表示
+                    const pass = window.selectedPass;
+                    const duration = (pass.endTime - pass.startTime) / 1000 / 60;
+                    infoDiv.innerHTML = `
+                        <div class="bg-blue-900/30 rounded p-2">
+                            <div class="text-blue-300 font-semibold text-sm mb-2 flex items-center justify-between">
+                                <span>📡 選択されたパス</span>
+                                <button onclick="window.selectedPass = null; drawISSSkymapCanvas();" class="text-xs text-slate-400 hover:text-white">
+                                    現在位置に戻る
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                    <div class="text-slate-400">開始時刻</div>
+                                    <div class="text-white font-mono">${moment(pass.startTime).format('M/D HH:mm')}</div>
+                                </div>
+                                <div>
+                                    <div class="text-slate-400">終了時刻</div>
+                                    <div class="text-white font-mono">${moment(pass.endTime).format('M/D HH:mm')}</div>
+                                </div>
+                                <div>
+                                    <div class="text-slate-400">最大高度</div>
+                                    <div class="text-white font-mono">${pass.maxElevation.toFixed(1)}°</div>
+                                </div>
+                                <div>
+                                    <div class="text-slate-400">最大高度時刻</div>
+                                    <div class="text-white font-mono">${moment(pass.maxElevationTime).format('HH:mm')}</div>
+                                </div>
+                                <div>
+                                    <div class="text-slate-400">継続時間</div>
+                                    <div class="text-white">${duration.toFixed(0)}分</div>
+                                </div>
+                                <div>
+                                    <div class="text-slate-400">距離</div>
+                                    <div class="text-white">${pass.maxDistance.toFixed(0)}km</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (issVisible) {
                     const direction = getDirection(issAzimuth);
                     infoDiv.innerHTML = `
                         <div class="grid grid-cols-3 gap-4 text-xs">

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-01-15
+
+### Added
+- ISSの次回パス予測機能を追加（7日間）
+- 次回可視時刻・最大仰角・距離を一覧表示
+- パスの品質を4段階評価（最適/良好/可/低）
+- 星座図に選択したパスの軌道を青い点線で表示
+- 軌道上の5分刻みマーカーと時刻ラベル表示
+- パス詳細情報パネル（開始・終了時刻、最大仰角、継続時間、距離）
+- 「現在位置に戻る」ボタンで軌道表示をクリア
+
+### Improved
+- ISS星座図機能を拡張し、過去・現在・未来のISSパスを可視化
+- 最大仰角10度以上のパスのみを表示（観測可能性を考慮）
+
 ## [2.6.3] - 2026-01-15
 
 ### Fixed
