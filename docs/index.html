@@ -107,7 +107,7 @@
                 <div id="current-clock" class="text-xl font-semibold font-mono">--:--:--</div>
                 <div class="text-slate-400 text-sm">現在時刻 (Asia/Tokyo)</div>
                 <div class="text-slate-500 text-xs mt-2 flex items-center gap-2">
-                    Ver. 2.3.1
+                    Ver. 2.3.2
                     <button onclick="toggleNightVision()" class="text-xs bg-red-900/30 hover:bg-red-800/50 px-2 py-1 rounded border border-red-600/30" title="ナイトビジョンモード">
                         <i data-lucide="moon" class="w-3 h-3 inline"></i>
                     </button>
@@ -1513,7 +1513,9 @@
             document.getElementById('condensation-risk').innerText = condensationRisk;
 
             // 日月出没・天文薄明の計算と表示
-            const sunMoonTimes = calculateSunMoonTimes(targetDate, currentLat, currentLon);
+            // 指定日時の0時0分を基準にすることで、その日の日の出入りを正確に取得
+            const startOfDay = moment(targetDate).startOf('day').toDate();
+            const sunMoonTimes = calculateSunMoonTimes(startOfDay, currentLat, currentLon);
             updateSunMoonDisplay(sunMoonTimes);
             renderTimeline(sunMoonTimes, targetDate);
 
