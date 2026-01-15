@@ -362,59 +362,84 @@
                     <i data-lucide="star" class="text-yellow-400 w-5 h-5"></i> 天体イベント情報
                 </h3>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="space-y-3">
                     <!-- 今夜見える惑星 -->
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <h4 class="font-semibold text-sm mb-3 flex items-center gap-2">
-                            <i data-lucide="planet" class="w-4 h-4 text-purple-400"></i>
-                            今夜見える惑星
-                        </h4>
-                        <div id="visible-planets" class="space-y-2 text-sm">
-                            <div class="text-slate-400">計算中...</div>
+                    <div class="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
+                        <button onclick="toggleAccordion('planets')" class="w-full p-4 flex items-center justify-between hover:bg-slate-700/30 transition">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="planet" class="w-4 h-4 text-purple-400"></i>
+                                <span class="font-semibold text-sm">今夜見える惑星</span>
+                            </div>
+                            <i id="icon-planets" data-lucide="chevron-down" class="w-4 h-4 transition-transform"></i>
+                        </button>
+                        <div id="content-planets" class="hidden px-4 pb-4">
+                            <div id="visible-planets" class="space-y-2 text-sm">
+                                <div class="text-slate-400">計算中...</div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- 流星群カレンダー -->
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <h4 class="font-semibold text-sm mb-3 flex items-center gap-2">
-                            <i data-lucide="zap" class="w-4 h-4 text-yellow-400"></i>
-                            流星群カレンダー
-                        </h4>
-                        <div id="meteor-showers" class="space-y-2 text-sm">
-                            <div class="text-slate-400">読み込み中...</div>
+                    <div class="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
+                        <button onclick="toggleAccordion('meteors')" class="w-full p-4 flex items-center justify-between hover:bg-slate-700/30 transition">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="zap" class="w-4 h-4 text-yellow-400"></i>
+                                <span class="font-semibold text-sm">流星群カレンダー</span>
+                            </div>
+                            <i id="icon-meteors" data-lucide="chevron-down" class="w-4 h-4 transition-transform"></i>
+                        </button>
+                        <div id="content-meteors" class="hidden px-4 pb-4">
+                            <div id="meteor-showers" class="space-y-2 text-sm">
+                                <div class="text-slate-400">読み込み中...</div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- ISS現在位置 -->
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <h4 class="font-semibold text-sm mb-3 flex items-center gap-2">
-                            <i data-lucide="satellite" class="w-4 h-4 text-blue-400"></i>
-                            ISS現在位置
-                        </h4>
-                        <div id="iss-location" class="space-y-2 text-sm">
-                            <div class="text-slate-400">取得中...</div>
+                    <div class="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
+                        <button onclick="toggleAccordion('iss-location-acc')" class="w-full p-4 flex items-center justify-between hover:bg-slate-700/30 transition">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="satellite" class="w-4 h-4 text-blue-400"></i>
+                                <span class="font-semibold text-sm">ISS現在位置</span>
+                            </div>
+                            <i id="icon-iss-location-acc" data-lucide="chevron-down" class="w-4 h-4 transition-transform"></i>
+                        </button>
+                        <div id="content-iss-location-acc" class="hidden px-4 pb-4">
+                            <div id="iss-location" class="space-y-2 text-sm">
+                                <div class="text-slate-400">取得中...</div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- ISS乗員情報 -->
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <h4 class="font-semibold text-sm mb-3 flex items-center gap-2">
-                            <i data-lucide="users" class="w-4 h-4 text-purple-400"></i>
-                            ISS乗員情報
-                        </h4>
-                        <div id="iss-astronauts" class="space-y-2 text-sm">
-                            <div class="text-slate-400">取得中...</div>
+                    <div class="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
+                        <button onclick="toggleAccordion('astronauts')" class="w-full p-4 flex items-center justify-between hover:bg-slate-700/30 transition">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-purple-400"></i>
+                                <span class="font-semibold text-sm">ISS乗員情報</span>
+                            </div>
+                            <i id="icon-astronauts" data-lucide="chevron-down" class="w-4 h-4 transition-transform"></i>
+                        </button>
+                        <div id="content-astronauts" class="hidden px-4 pb-4">
+                            <div id="iss-astronauts" class="space-y-2 text-sm">
+                                <div class="text-slate-400">取得中...</div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- 月齢による観測推奨天体 -->
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <h4 class="font-semibold text-sm mb-3 flex items-center gap-2">
-                            <i data-lucide="telescope" class="w-4 h-4 text-green-400"></i>
-                            月齢による観測推奨天体
-                        </h4>
-                        <div id="recommended-objects" class="space-y-2 text-sm">
-                            <div class="text-slate-400">計算中...</div>
+                    <div class="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
+                        <button onclick="toggleAccordion('recommended')" class="w-full p-4 flex items-center justify-between hover:bg-slate-700/30 transition">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="telescope" class="w-4 h-4 text-green-400"></i>
+                                <span class="font-semibold text-sm">月齢による観測推奨天体</span>
+                            </div>
+                            <i id="icon-recommended" data-lucide="chevron-down" class="w-4 h-4 transition-transform"></i>
+                        </button>
+                        <div id="content-recommended" class="hidden px-4 pb-4">
+                            <div id="recommended-objects" class="space-y-2 text-sm">
+                                <div class="text-slate-400">計算中...</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -519,6 +544,23 @@
         // ページロード時にナイトビジョンモードを復元
         if (localStorage.getItem('nightVisionMode') === 'true') {
             document.body.classList.add('night-vision');
+        }
+
+        // --- アコーディオン機能 ---
+        function toggleAccordion(id) {
+            const content = document.getElementById('content-' + id);
+            const icon = document.getElementById('icon-' + id);
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+
+            // Lucideアイコンを再初期化
+            lucide.createIcons();
         }
 
         // --- お気に入り地点管理 ---
