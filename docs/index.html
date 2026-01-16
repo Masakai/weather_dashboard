@@ -2427,6 +2427,7 @@
             // ISS星図モーダルが開いている場合は再描画
             const skymapModal = document.getElementById('iss-skymap-modal');
             if (skymapModal && !skymapModal.classList.contains('hidden')) {
+                console.log('星図を再描画します。時刻:', targetDate);
                 drawISSSkymapCanvas();
             }
         }
@@ -2466,6 +2467,7 @@
                 }
 
                 const targetDate = currentDatetime ? new Date(currentDatetime) : new Date();
+                console.log('星図描画時刻:', targetDate, 'currentDatetime:', currentDatetime);
                 const observer = new Astronomy.Observer(currentLat, currentLon, 0);
 
                 // 極座標変換関数（方位角・高度 → Canvas座標）
