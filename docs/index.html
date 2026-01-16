@@ -2423,6 +2423,12 @@
 
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('dashboard-content').classList.remove('hidden');
+
+            // ISS星図モーダルが開いている場合は再描画
+            const skymapModal = document.getElementById('iss-skymap-modal');
+            if (skymapModal && !skymapModal.classList.contains('hidden')) {
+                drawISSSkymapCanvas();
+            }
         }
 
         // ISS星座図モーダル関連
