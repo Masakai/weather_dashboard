@@ -1,90 +1,90 @@
-# CLAUDE.md - AI Assistant Guide
+# CLAUDE.md - AI支援開発ガイド
 
-**Project**: 天体観測できるかな？ (Astronomical Observation Weather Dashboard)
-**Version**: 3.1.5
-**Organization**: 株式会社リバーランズ・コンサルティング
-**Last Updated**: 2026-01-17
-
----
-
-## Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [Repository Structure](#repository-structure)
-3. [Architecture & Design](#architecture--design)
-4. [Code Organization](#code-organization)
-5. [Development Workflow](#development-workflow)
-6. [Coding Conventions](#coding-conventions)
-7. [Technology Stack](#technology-stack)
-8. [File Reference](#file-reference)
-9. [Common Development Tasks](#common-development-tasks)
-10. [Important Notes for AI Assistants](#important-notes-for-ai-assistants)
+**プロジェクト**: 天体観測できるかな？ (Astronomical Observation Weather Dashboard)
+**バージョン**: 3.1.5
+**開発元**: 株式会社リバーランズ・コンサルティング
+**最終更新日**: 2026-01-17
 
 ---
 
-## Project Overview
+## 目次
 
-### What is This Project?
-
-This is an **astronomical observation weather dashboard** that helps users determine optimal conditions for stargazing. It integrates:
-
-- **Weather data** (cloud cover, humidity, visibility, wind speed)
-- **Astronomical calculations** (sun/moon positions, twilight times, planetary positions)
-- **ISS tracking** (International Space Station orbital predictions)
-- **Comprehensive scoring** (0-100 scale for stargazing visibility)
-
-### Key Features
-
-1. **Starry Sky Visibility Score**: Weighted evaluation of multiple weather factors
-2. **Astronomical Twilight Calculation**: Precise timing for observation windows
-3. **24-Hour Timeline Visualization**: Color-coded observation suitability
-4. **ISS Pass Predictions**: 7-day forecast with sky map visualization
-5. **Interactive Sky Map**: Canvas-based celestial object plotting
-6. **Night Vision Mode**: Red-tinted display to preserve dark adaptation
-7. **Favorite Locations**: Save up to 5 observation sites
-8. **Milky Way Visibility**: Galactic center position and viewing predictions
-
-### Language
-
-- **UI Language**: Japanese (ja)
-- **Code Comments**: Mixed Japanese/English (prefer Japanese for user-facing features)
-- **Documentation**: Primarily Japanese
+1. [プロジェクト概要](#プロジェクト概要)
+2. [リポジトリ構造](#リポジトリ構造)
+3. [アーキテクチャとデザイン](#アーキテクチャとデザイン)
+4. [コード構成](#コード構成)
+5. [開発ワークフロー](#開発ワークフロー)
+6. [コーディング規約](#コーディング規約)
+7. [技術スタック](#技術スタック)
+8. [ファイルリファレンス](#ファイルリファレンス)
+9. [よくある開発タスク](#よくある開発タスク)
+10. [AI支援開発のための重要な注意事項](#ai支援開発のための重要な注意事項)
 
 ---
 
-## Repository Structure
+## プロジェクト概要
+
+### このプロジェクトについて
+
+これは、ユーザーが天体観測に最適な条件を判断するのに役立つ**天体観測気象ダッシュボード**です。以下の要素を統合しています：
+
+- **気象データ** (雲量・湿度・視程・風速)
+- **天文計算** (太陽・月の位置、薄明時刻、惑星位置)
+- **ISS追跡** (国際宇宙ステーションの軌道予測)
+- **総合スコアリング** (星空視認性を0-100点でスコア化)
+
+### 主要機能
+
+1. **星空視認性スコア**: 複数の気象要素を加重評価
+2. **天文薄明計算**: 観測ウィンドウの正確なタイミング
+3. **24時間タイムライン可視化**: 観測適性を色分けして表示
+4. **ISSパス予測**: 7日間の予報と星座図可視化
+5. **インタラクティブ星座図**: Canvas による天体オブジェクトのプロット
+6. **ナイトビジョンモード**: 暗順応を保つ赤色表示
+7. **お気に入り地点**: 最大5地点の観測地を保存
+8. **天の川視認性**: 銀河中心位置と視認性予測
+
+### 使用言語
+
+- **UI言語**: 日本語
+- **コードコメント**: 日本語・英語混在（ユーザー向け機能は日本語優先）
+- **ドキュメント**: 主に日本語
+
+---
+
+## リポジトリ構造
 
 ```
 weather_dashboard/
-├── CHANGELOG.md              # Version history (semantic versioning)
-├── README.md                 # User-facing documentation (Japanese)
-├── CLAUDE.md                 # This file - AI assistant guide
-└── docs/                     # Application root (served as static site)
-    ├── index.html            # Main HTML file
-    ├── main.js               # Entry point (ES Module)
-    ├── state.js              # Centralized application state
-    ├── constants.js          # Static data (meteor showers, seasonal objects)
-    ├── ui-utils.js           # Common UI controls (accordion, night vision)
-    ├── location-service.js   # Location, map, favorites management
-    ├── weather-service.js    # Weather data fetching, dashboard rendering
-    ├── iss-service.js        # ISS orbit calculation, notifications
-    ├── astronomy-service.js  # Planets, galaxy, astronomical events
-    ├── CHANGELOG.md          # Duplicate changelog in docs folder
-    └── internal_spec.md      # Technical specification (Japanese)
+├── CHANGELOG.md              # バージョン履歴（セマンティックバージョニング）
+├── README.md                 # ユーザー向けドキュメント（日本語）
+├── CLAUDE.md                 # 本ファイル - AI支援開発ガイド
+└── docs/                     # アプリケーションルート（静的サイトとして配信）
+    ├── index.html            # メインHTMLファイル
+    ├── main.js               # エントリーポイント（ES Module）
+    ├── state.js              # 集約されたアプリケーション状態
+    ├── constants.js          # 静的データ（流星群、季節の天体）
+    ├── ui-utils.js           # 共通UI制御（アコーディオン、ナイトビジョン）
+    ├── location-service.js   # 位置情報、地図、お気に入り管理
+    ├── weather-service.js    # 気象データ取得、ダッシュボード描画
+    ├── iss-service.js        # ISS軌道計算、通知
+    ├── astronomy-service.js  # 惑星、銀河、天文イベント
+    ├── CHANGELOG.md          # docs フォルダ内の CHANGELOG 複製
+    └── internal_spec.md      # 技術仕様書（日本語）
 ```
 
-### Key Points
+### ポイント
 
-- **No build process**: Pure HTML/CSS/JS served directly from `docs/` folder
-- **ES Modules**: All JavaScript files use `export`/`import` syntax
-- **Version parameters**: Module imports include `?v=X.X.X` for cache busting
-- **GitHub Pages compatible**: Designed to be deployed as static site
+- **ビルドプロセス不要**: `docs/` フォルダから直接配信される純粋な HTML/CSS/JS
+- **ES Modules**: すべてのJavaScriptファイルで `export`/`import` 構文を使用
+- **バージョンパラメータ**: モジュールインポートに `?v=X.X.X` を含めてキャッシュ対策
+- **GitHub Pages 互換**: 静的サイトとしてデプロイできるよう設計
 
 ---
 
-## Architecture & Design
+## アーキテクチャとデザイン
 
-### System Architecture
+### システムアーキテクチャ
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -121,32 +121,32 @@ weather_dashboard/
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Design Principles
+### 設計原則
 
-1. **Service-Oriented Architecture**: Each module handles a specific domain (weather, ISS, astronomy)
-2. **Centralized State**: All app state lives in `AppState` object (no scattered globals)
-3. **Functional Decomposition**: Large functions split into focused, single-purpose functions
-4. **Backward Compatibility**: Functions exposed to `window` for inline HTML event handlers
-5. **Cache Management**: Version parameters on imports to prevent stale module loading
+1. **サービス指向アーキテクチャ**: 各モジュールは特定のドメイン（気象、ISS、天文）を担当
+2. **状態の一元管理**: すべてのアプリケーション状態は `AppState` オブジェクトに集約（グローバル変数の乱立を回避）
+3. **機能分解**: 大きな関数を焦点を絞った単一目的の関数に分割
+4. **後方互換性**: インラインHTMLイベントハンドラのために関数を `window` に公開
+5. **キャッシュ管理**: 古いモジュールのロードを防ぐためインポートにバージョンパラメータを付与
 
-### Major Refactoring (v3.0.0)
+### 大規模リファクタリング (v3.0.0)
 
-In version 3.0.0, the codebase underwent a **major refactoring**:
+バージョン3.0.0では、コードベースが**大規模なリファクタリング**を実施：
 
-**Before**: Single `functions.js` file (~3,000 lines) with mixed responsibilities
-**After**: 5 modular service files with clear separation of concerns
+**変更前**: 単一の `functions.js` ファイル（約3,000行）に複数の責務が混在
+**変更後**: 関心の分離が明確な5つのモジュール化されたサービスファイル
 
-This was done while maintaining **100% backward compatibility** with existing HTML event handlers.
+この変更は、既存のHTMLイベントハンドラとの**100%の後方互換性を維持**しながら実施されました。
 
 ---
 
-## Code Organization
+## コード構成
 
-### Module Breakdown
+### モジュール詳細
 
-#### `state.js` - Application State
+#### `state.js` - アプリケーション状態
 
-**Purpose**: Centralized state management
+**目的**: 状態管理の一元化
 
 ```javascript
 export const AppState = {
@@ -157,279 +157,279 @@ export const AppState = {
 };
 ```
 
-**Key Conventions**:
-- Always import from other modules: `import { AppState } from './state.js?v=X.X.X';`
-- Never create new global variables; add to AppState instead
-- Use `localStorage` for persistence (favorites, night vision mode)
+**重要な規約**:
+- 他のモジュールから必ずインポートする: `import { AppState } from './state.js?v=X.X.X';`
+- 新しいグローバル変数を作成しない; 代わりに AppState に追加
+- 永続化には `localStorage` を使用（お気に入り、ナイトビジョンモード）
 
 ---
 
-#### `constants.js` - Static Data
+#### `constants.js` - 静的データ
 
-**Purpose**: Immutable reference data
+**目的**: 不変の参照データ
 
-**Exports**:
-- `METEOR_SHOWERS`: Array of major meteor showers with peak dates
-- `SEASONAL_OBJECTS`: Seasonal celestial objects categorized by moon phase
+**エクスポート**:
+- `METEOR_SHOWERS`: 主要な流星群とピーク日の配列
+- `SEASONAL_OBJECTS`: 月齢別に分類された季節の天体
 
-**Convention**: Use `export const` for all constants
-
----
-
-#### `ui-utils.js` - Common UI Controls
-
-**Purpose**: Shared UI functionality
-
-**Key Functions**:
-- `toggleAccordion(id)`: Expand/collapse accordion panels
-- `toggleNightVision()`: Switch red-tinted night mode
-- `escapeHtml(text)`: Sanitize user input (guards against null/undefined)
-- `updateDateTime(datetime)`: Synchronize datetime picker with app state
-
-**Convention**: Pure utility functions with no side effects beyond DOM manipulation
+**規約**: すべての定数に `export const` を使用
 
 ---
 
-#### `location-service.js` - Location Management
+#### `ui-utils.js` - 共通UI制御
 
-**Purpose**: Geolocation, maps, and favorites
+**目的**: 共有UI機能
 
-**Key Functions**:
-- `getCurrentLocation(isInitial)`: Request browser geolocation
-- `updateAppLocation(lat, lon)`: Central location change handler
-- `addFavoriteLocation()`: Save location to favorites (max 5)
-- `renderFavoriteLocations()`: Display favorite location list
-- `initMap()`: Initialize Leaflet map
+**主要関数**:
+- `toggleAccordion(id)`: アコーディオンパネルの展開/折りたたみ
+- `toggleNightVision()`: 赤色調のナイトモード切り替え
+- `escapeHtml(text)`: ユーザー入力のサニタイズ（null/undefined ガード）
+- `updateDateTime(datetime)`: datetime ピッカーとアプリ状態の同期
 
-**Dependencies**:
-- Leaflet.js for map rendering
-- OpenStreetMap Nominatim for reverse geocoding
-- `localStorage` for favorite persistence
-
-**Convention**: All functions that change location should call `updateAppLocation()`
+**規約**: DOM 操作以外の副作用を持たない純粋なユーティリティ関数
 
 ---
 
-#### `weather-service.js` - Weather Data & Dashboard
+#### `location-service.js` - 位置情報管理
 
-**Purpose**: Fetch weather data and render main dashboard
+**目的**: 位置情報、地図、お気に入り
 
-**Key Functions**:
-- `fetchWeather()`: Retrieve forecast from Open-Meteo API
-- `renderDashboard()`: Orchestrate rendering of all dashboard elements
-- `calculateStarryScore()`: Compute 0-100 visibility score
-- `renderRadarChart()`: Draw 5-axis radar chart (Chart.js)
-- `renderTimeline()`: Create 24-hour observation timeline
-- `renderTemperatureChart()`: Temperature/humidity line graph
-- `renderCloudChart()`: Cloud cover layer graph
+**主要関数**:
+- `getCurrentLocation(isInitial)`: ブラウザの位置情報をリクエスト
+- `updateAppLocation(lat, lon)`: 位置変更の中央ハンドラ
+- `addFavoriteLocation()`: お気に入りに位置を保存（最大5件）
+- `renderFavoriteLocations()`: お気に入り地点リストの表示
+- `initMap()`: Leaflet 地図の初期化
 
-**Scoring Algorithm**:
+**依存関係**:
+- Leaflet.js: 地図レンダリング
+- OpenStreetMap Nominatim: 逆ジオコーディング
+- `localStorage`: お気に入りの永続化
+
+**規約**: 位置を変更するすべての関数は `updateAppLocation()` を呼び出す
+
+---
+
+#### `weather-service.js` - 気象データとダッシュボード
+
+**目的**: 気象データの取得とメインダッシュボードの描画
+
+**主要関数**:
+- `fetchWeather()`: Open-Meteo API から予報を取得
+- `renderDashboard()`: すべてのダッシュボード要素の描画を統括
+- `calculateStarryScore()`: 0-100 の視認性スコアを計算
+- `renderRadarChart()`: 5軸レーダーチャートを描画（Chart.js）
+- `renderTimeline()`: 24時間観測タイムラインを作成
+- `renderTemperatureChart()`: 気温/湿度折れ線グラフ
+- `renderCloudChart()`: 雲量層グラフ
+
+**スコア計算アルゴリズム**:
 ```javascript
-score = cloudScore(40%) + moonScore(30%) + humidityScore(15%)
-        + visibilityScore(10%) + windScore(5%)
+score = 雲量スコア(40%) + 月スコア(30%) + 湿度スコア(15%)
+        + 視程スコア(10%) + 風速スコア(5%)
 ```
 
-**Convention**: Weather data is stored in `AppState.weather.data` after fetching
+**規約**: 気象データは取得後 `AppState.weather.data` に保存
 
 ---
 
-#### `iss-service.js` - ISS Tracking
+#### `iss-service.js` - ISS追跡
 
-**Purpose**: ISS orbit calculation and pass predictions
+**目的**: ISS軌道計算とパス予測
 
-**Key Functions**:
-- `updateISSInfo()`: Fetch latest TLE from CelesTrak (cached 24h)
-- `calculateISSPasses()`: Predict 7-day passes using satellite.js
-- `drawISSSkymapCanvas(pass)`: Render sky map with ISS trajectory
-- `checkISSNotifications()`: Monitor for upcoming passes (1-hour warning)
-- `requestNotificationPermission()`: Request browser notification permission
+**主要関数**:
+- `updateISSInfo()`: CelesTrak から最新 TLE を取得（24時間キャッシュ）
+- `calculateISSPasses()`: satellite.js を使用して7日間のパスを予測
+- `drawISSSkymapCanvas(pass)`: ISS軌道付きの星座図を描画
+- `checkISSNotifications()`: 接近パスを監視（1時間前警告）
+- `requestNotificationPermission()`: ブラウザ通知権限をリクエスト
 
-**TLE Caching**:
-- TLE data stored in `localStorage` with timestamp
-- Refreshed only if >24 hours old (reduces API calls)
+**TLE キャッシュ**:
+- TLE データはタイムスタンプ付きで `localStorage` に保存
+- 24時間以上経過した場合のみ更新（API呼び出しを削減）
 
-**Pass Prediction Logic**:
-1. Propagate ISS position every 1 minute for 7 days
-2. Convert ECI → ECF → Look Angles (azimuth, elevation)
-3. Detect passes: elevation > 0° (above horizon)
-4. Filter: only passes with max elevation > 10° (observable)
-5. Store in `AppState.iss.calculatedPasses`
+**パス予測ロジック**:
+1. 7日間、1分刻みでISS位置を計算
+2. ECI → ECF → Look Angles（方位角、仰角）に変換
+3. パスを検出: 仰角 > 0°（地平線上）
+4. フィルタリング: 最大仰角 > 10° のパスのみ（観測可能）
+5. `AppState.iss.calculatedPasses` に保存
 
-**Sky Map Coordinate Transform**:
+**星座図座標変換**:
 ```javascript
-// Azimuth/Altitude → Canvas (X, Y)
+// 方位角/高度 → Canvas (X, Y)
 radius = ((90 - altitude) / 90) * maxRadius;
 x = centerX + radius * sin(azimuth);
 y = centerY - radius * cos(azimuth);
 ```
 
-**Convention**: Always check for TLE data before calculations
+**規約**: 計算前に必ず TLE データの存在を確認
 
 ---
 
-#### `astronomy-service.js` - Astronomical Calculations
+#### `astronomy-service.js` - 天文計算
 
-**Purpose**: Celestial events, planets, Milky Way visibility
+**目的**: 天体イベント、惑星、天の川視認性
 
-**Key Functions**:
-- `calculateSunMoonTimes()`: Sunrise, sunset, twilight times (Astronomy Engine)
-- `calculateMoonData()`: Moon phase, age, illumination
-- `calculateMilkyWayVisibility()`: Galactic center visibility score
-- `updateAstronomicalEvents()`: Render planet positions, meteor showers
-- `calculateExposureSettings()`: Astrophotography exposure calculator
+**主要関数**:
+- `calculateSunMoonTimes()`: 日の出・日の入り、薄明時刻（Astronomy Engine）
+- `calculateMoonData()`: 月相、月齢、照度
+- `calculateMilkyWayVisibility()`: 銀河中心視認性スコア
+- `updateAstronomicalEvents()`: 惑星位置、流星群の描画
+- `calculateExposureSettings()`: 天体写真露出計算機
 
-**Astronomical Twilight**:
-- **Civil**: Sun at -6° (bright stars visible)
-- **Nautical**: Sun at -12° (horizon still visible)
-- **Astronomical**: Sun at -18° (true darkness, optimal for observation)
+**天文薄明**:
+- **市民薄明**: 太陽高度 -6°（明るい星が見える）
+- **航海薄明**: 太陽高度 -12°（地平線がまだ見える）
+- **天文薄明**: 太陽高度 -18°（真の暗闇、観測に最適）
 
-**Milky Way Visibility Factors**:
-1. Moon phase (prefer new moon)
-2. Moon altitude (lower is better)
-3. Angular distance between moon and galactic center
-4. Cloud cover
-5. Galactic center altitude (must be above horizon)
+**天の川視認性の要因**:
+1. 月相（新月が望ましい）
+2. 月の高度（低い方が良い）
+3. 月と銀河中心の角距離
+4. 雲量
+5. 銀河中心の高度（地平線上である必要がある）
 
-**Convention**: Use Astronomy Engine library for all celestial calculations
-
----
-
-#### `main.js` - Entry Point
-
-**Purpose**: Initialize app and bridge modules to global scope
-
-**What It Does**:
-1. Import all service modules
-2. Merge all exports into `window` object (for HTML onclick handlers)
-3. Register `AppState` to `window`
-4. Initialize Lucide icons
-5. Set Moment.js locale to Japanese
-6. Restore night vision mode from localStorage
-7. Start clock update interval
-8. Get user location on page load
-
-**Convention**: Keep this file minimal; logic belongs in service modules
+**規約**: すべての天体計算には Astronomy Engine ライブラリを使用
 
 ---
 
-### ES Module Import Convention
+#### `main.js` - エントリーポイント
 
-**Always use version parameters for cache busting**:
+**目的**: アプリの初期化とモジュールのグローバルスコープへのブリッジ
+
+**機能**:
+1. すべてのサービスモジュールをインポート
+2. すべてのエクスポートを `window` オブジェクトにマージ（HTML onclick ハンドラ用）
+3. `AppState` を `window` に登録
+4. Lucide アイコンを初期化
+5. Moment.js のロケールを日本語に設定
+6. localStorage からナイトビジョンモードを復元
+7. 時計更新インターバルを開始
+8. ページロード時にユーザーの位置を取得
+
+**規約**: このファイルは最小限に保つ; ロジックはサービスモジュールに配置
+
+---
+
+### ES Module インポート規約
+
+**キャッシュバスティングのため常にバージョンパラメータを使用**:
 
 ```javascript
 import { AppState } from './state.js?v=3.1.5';
 import * as weatherService from './weather-service.js?v=3.1.5';
 ```
 
-**Why?**: GitHub Pages and CDNs aggressively cache JS files. Version parameters force browser to fetch new versions.
+**理由**: GitHub Pages と CDN は JS ファイルを積極的にキャッシュします。バージョンパラメータによりブラウザに新バージョンの取得を強制します。
 
-**When to Update Version**:
-- On every release, update version in all module imports
-- Version should match the version in README.md and CHANGELOG.md
+**バージョン更新のタイミング**:
+- すべてのリリース時に、すべてのモジュールインポートのバージョンを更新
+- バージョンは README.md と CHANGELOG.md のバージョンと一致させる
 
 ---
 
-## Development Workflow
+## 開発ワークフロー
 
-### Branching Strategy
+### ブランチ戦略
 
-**Branch Naming Convention**: `claude/<feature-description>-<session-id>`
+**ブランチ命名規則**: `claude/<機能説明>-<セッションID>`
 
-Examples:
+例:
 - `claude/refactor-js-modularize-Xsh2o`
 - `claude/add-claude-documentation-NF21K`
 - `claude/realtime-skymap-7UDHG`
 
-**Why this convention?**:
-- Prefix `claude/` indicates AI-assisted development
-- Session ID prevents branch name collisions
-- Git operations require matching session ID for security
+**この規則の理由**:
+- プレフィックス `claude/` は AI 支援開発を示す
+- セッション ID はブランチ名の衝突を防止
+- Git 操作はセキュリティのために一致するセッション ID を要求
 
-### Commit Message Style
+### コミットメッセージスタイル
 
-**Language**: Japanese
-**Format**: Semantic, descriptive
+**言語**: 日本語
+**形式**: セマンティック、説明的
 
-Good examples from recent history:
+過去の良い例:
 ```
 ISS星座図のリアルタイム更新モードを実装し、パス予測切り替え機能を改善。バージョンを3.1.5に更新。
 バージョンを3.1.3に更新。全モジュールのインポートにバージョンパラメータを追加し、リモート環境でのキャッシュ問題を解消。
 escapeHtml関数にnull/undefinedガードを追加し、main.jsのキャッシュ対策としてバージョンパラメータを追加。バージョンを3.1.2に更新。
 ```
 
-**Commit Message Guidelines**:
-1. Write in Japanese
-2. Start with main change, then list supporting changes
-3. Always mention version number if bumped
-4. Be specific about what was fixed/added/changed
+**コミットメッセージガイドライン**:
+1. 日本語で記述
+2. 主な変更から始め、その後補助的な変更をリスト
+3. バージョンを上げた場合は必ず言及
+4. 修正/追加/変更した内容を具体的に記述
 
-### Versioning (Semantic Versioning)
+### バージョニング（セマンティックバージョニング）
 
-**Format**: `MAJOR.MINOR.PATCH`
+**形式**: `MAJOR.MINOR.PATCH`
 
-- **MAJOR** (X.0.0): Breaking changes, major refactors (e.g., v3.0.0 modularization)
-- **MINOR** (x.Y.0): New features, enhancements (e.g., v2.11.0 exposure calculator)
-- **PATCH** (x.y.Z): Bug fixes, small improvements (e.g., v3.1.2 null guard)
+- **MAJOR** (X.0.0): 破壊的変更、大規模リファクタリング（例: v3.0.0 モジュール化）
+- **MINOR** (x.Y.0): 新機能、拡張（例: v2.11.0 露出計算機）
+- **PATCH** (x.y.Z): バグ修正、小さな改善（例: v3.1.2 null ガード）
 
-**Files to Update**:
-1. `README.md` (badge and version header)
-2. `CHANGELOG.md` (add new entry at top)
-3. `docs/CHANGELOG.md` (keep in sync)
-4. All module imports in JS files (update `?v=X.Y.Z`)
+**更新すべきファイル**:
+1. `README.md`（バッジとバージョンヘッダー）
+2. `CHANGELOG.md`（先頭に新エントリを追加）
+3. `docs/CHANGELOG.md`（同期を保つ）
+4. JS ファイルのすべてのモジュールインポート（`?v=X.Y.Z` を更新）
 
-### Pull Request Workflow
+### プルリクエストワークフロー
 
-1. **Develop on feature branch** (e.g., `claude/feature-name-ABC123`)
-2. **Commit changes** with descriptive Japanese messages
-3. **Update CHANGELOG.md** with all changes
-4. **Bump version** in all files
-5. **Push to remote** (`git push -u origin claude/feature-name-ABC123`)
-6. **Create PR** to main branch with summary in Japanese
+1. **フィーチャーブランチで開発**（例: `claude/feature-name-ABC123`）
+2. **変更をコミット**（説明的な日本語メッセージ）
+3. **CHANGELOG.md を更新**（すべての変更を記載）
+4. **バージョンを更新**（すべてのファイル）
+5. **リモートにプッシュ**（`git push -u origin claude/feature-name-ABC123`）
+6. **PR を作成**（日本語のサマリー付きでメインブランチへ）
 
 ---
 
-## Coding Conventions
+## コーディング規約
 
-### JavaScript Style
+### JavaScript スタイル
 
-**ES6+ Features**: Use modern JavaScript
-- Arrow functions: `const func = () => {}`
-- Template literals: `` `Hello ${name}` ``
-- Destructuring: `const { lat, lon } = AppState.location;`
-- Async/await: Prefer over raw Promises
-- Optional chaining: `obj?.prop?.nested`
+**ES6+ 機能**: モダンな JavaScript を使用
+- アロー関数: `const func = () => {}`
+- テンプレートリテラル: `` `Hello ${name}` ``
+- 分割代入: `const { lat, lon } = AppState.location;`
+- Async/await: 素の Promise より優先
+- オプショナルチェーン: `obj?.prop?.nested`
 
-**Naming**:
-- **Functions**: camelCase (`calculateStarryScore`)
-- **Constants**: UPPER_SNAKE_CASE (`METEOR_SHOWERS`)
-- **Files**: kebab-case (`weather-service.js`)
-- **Modules**: camelCase when imported (`weatherService`)
+**命名規則**:
+- **関数**: camelCase（`calculateStarryScore`）
+- **定数**: UPPER_SNAKE_CASE（`METEOR_SHOWERS`）
+- **ファイル**: kebab-case（`weather-service.js`）
+- **モジュール**: インポート時は camelCase（`weatherService`）
 
-**No Semicolons**: This project omits semicolons (ASI - Automatic Semicolon Insertion)
+**セミコロンなし**: このプロジェクトはセミコロンを省略（ASI - 自動セミコロン挿入）
 
-**Comments**:
-- Use Japanese for user-facing logic
-- Use English for technical/algorithmic comments
-- JSDoc-style comments for complex functions
+**コメント**:
+- ユーザー向けロジックは日本語
+- 技術的/アルゴリズム的コメントは英語
+- 複雑な関数には JSDoc スタイルのコメント
 
-### HTML Conventions
+### HTML 規約
 
-**Structure**:
-- Use TailwindCSS utility classes extensively
-- Glass-morphism design pattern (`.glass-panel`)
-- Responsive breakpoints: `md:`, `lg:` prefixes
+**構造**:
+- TailwindCSS ユーティリティクラスを広範に使用
+- グラスモーフィズムデザインパターン（`.glass-panel`）
+- レスポンシブブレークポイント: `md:`, `lg:` プレフィックス
 
-**Event Handlers**:
-- Inline handlers are acceptable (legacy compatibility)
-- Example: `onclick="toggleAccordion('iss-panel')"`
+**イベントハンドラ**:
+- インラインハンドラも許容（レガシー互換性）
+- 例: `onclick="toggleAccordion('iss-panel')"`
 
-**Accessibility**:
-- Use semantic HTML (`<section>`, `<header>`, `<main>`)
-- Lucide icons with aria labels
+**アクセシビリティ**:
+- セマンティック HTML を使用（`<section>`, `<header>`, `<main>`）
+- Lucide アイコンに aria ラベル
 
-### CSS Conventions
+### CSS 規約
 
-**Night Vision Mode**:
+**ナイトビジョンモード**:
 ```css
 body.night-vision {
     filter: hue-rotate(180deg) invert(1);
@@ -437,19 +437,19 @@ body.night-vision {
 }
 ```
 
-**Custom Styles**:
-- Defined in `<style>` tag in `index.html`
-- Minimal custom CSS (leverage TailwindCSS)
+**カスタムスタイル**:
+- `index.html` の `<style>` タグ内で定義
+- 最小限のカスタム CSS（TailwindCSS を活用）
 
-### Error Handling
+### エラーハンドリング
 
-**Best Practices**:
-1. Always validate null/undefined (e.g., `escapeHtml` function)
-2. Graceful fallbacks for API failures
-3. Console errors for debugging (not user-facing)
-4. User-friendly error messages in Japanese
+**ベストプラクティス**:
+1. 常に null/undefined を検証（例: `escapeHtml` 関数）
+2. API 失敗時のグレースフルなフォールバック
+3. デバッグ用のコンソールエラー（ユーザー向けではない）
+4. ユーザーフレンドリーなエラーメッセージは日本語
 
-**Example**:
+**例**:
 ```javascript
 try {
     const response = await fetch(url);
@@ -465,336 +465,336 @@ try {
 
 ---
 
-## Technology Stack
+## 技術スタック
 
-### Core Technologies
+### コアテクノロジー
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **HTML5** | - | Structure |
-| **CSS3** | - | Styling |
-| **JavaScript** | ES6+ | Logic |
-| **TailwindCSS** | latest (CDN) | Utility-first CSS framework |
+| 技術 | バージョン | 用途 |
+|------|-----------|------|
+| **HTML5** | - | 構造 |
+| **CSS3** | - | スタイリング |
+| **JavaScript** | ES6+ | ロジック |
+| **TailwindCSS** | latest (CDN) | ユーティリティファースト CSS フレームワーク |
 
-### Libraries (CDN)
+### ライブラリ（CDN）
 
-| Library | Version | Usage |
-|---------|---------|-------|
-| [Chart.js](https://www.chartjs.org/) | 4.4.1 | Temperature, cloud, radar charts |
-| [Moment.js](https://momentjs.com/) | 2.29.4 | Date/time manipulation, Japanese locale |
-| [Leaflet](https://leafletjs.com/) | 1.9.4 | Interactive maps |
-| [Lucide Icons](https://lucide.dev/) | latest | Icon library |
-| [Astronomy Engine](https://github.com/cosinekitty/astronomy) | 2.1.19 | Planetary positions, twilight calculations |
-| [Satellite.js](https://github.com/shashwatak/satellite-js) | 5.0.0 | ISS orbit calculations (TLE propagation) |
+| ライブラリ | バージョン | 用途 |
+|-----------|-----------|------|
+| [Chart.js](https://www.chartjs.org/) | 4.4.1 | 気温、雲量、レーダーチャート |
+| [Moment.js](https://momentjs.com/) | 2.29.4 | 日時操作、日本語ロケール |
+| [Leaflet](https://leafletjs.com/) | 1.9.4 | インタラクティブ地図 |
+| [Lucide Icons](https://lucide.dev/) | latest | アイコンライブラリ |
+| [Astronomy Engine](https://github.com/cosinekitty/astronomy) | 2.1.19 | 惑星位置、薄明計算 |
+| [Satellite.js](https://github.com/shashwatak/satellite-js) | 5.0.0 | ISS 軌道計算（TLE 伝播） |
 
-### External APIs
+### 外部 API
 
-| API | Rate Limit | Usage | Documentation |
-|-----|------------|-------|---------------|
-| **Open-Meteo** | Generous (free) | Weather forecasts (hourly, daily) | [open-meteo.com](https://open-meteo.com/) |
-| **Nominatim** | 1 req/sec | Reverse geocoding (coordinates → address) | [nominatim.org](https://nominatim.openstreetmap.org/) |
-| **CelesTrak** | No strict limit | ISS TLE data (cached 24h) | [celestrak.org](https://celestrak.org/) |
+| API | レート制限 | 用途 | ドキュメント |
+|-----|----------|------|------------|
+| **Open-Meteo** | 寛容（無料） | 気象予報（時間別、日別） | [open-meteo.com](https://open-meteo.com/) |
+| **Nominatim** | 1 req/秒 | 逆ジオコーディング（座標 → 住所） | [nominatim.org](https://nominatim.openstreetmap.org/) |
+| **CelesTrak** | 厳格な制限なし | ISS TLE データ（24時間キャッシュ） | [celestrak.org](https://celestrak.org/) |
 
-**API Guidelines**:
-- Always handle rate limits gracefully
-- Cache responses when possible (TLE caching example)
-- Provide user feedback on API failures
-
----
-
-## File Reference
-
-### Quick Reference
-
-| File | Lines | Purpose | Key Exports |
-|------|-------|---------|-------------|
-| `index.html` | ~1200 | Main UI | - |
-| `main.js` | ~52 | Entry point | - |
-| `state.js` | ~35 | State management | `AppState` |
-| `constants.js` | ~66 | Static data | `METEOR_SHOWERS`, `SEASONAL_OBJECTS` |
-| `ui-utils.js` | ~100 | UI utilities | `toggleAccordion`, `toggleNightVision`, `escapeHtml` |
-| `location-service.js` | ~300 | Location/maps | `getCurrentLocation`, `updateAppLocation`, `initMap` |
-| `weather-service.js` | ~800 | Weather/dashboard | `fetchWeather`, `renderDashboard`, `calculateStarryScore` |
-| `iss-service.js` | ~700 | ISS tracking | `updateISSInfo`, `calculateISSPasses`, `drawISSSkymapCanvas` |
-| `astronomy-service.js` | ~600 | Astronomical events | `calculateSunMoonTimes`, `updateAstronomicalEvents` |
-
-### Documentation Files
-
-| File | Purpose |
-|------|---------|
-| `README.md` | User-facing documentation (Japanese) |
-| `CHANGELOG.md` | Version history (Keep a Changelog format) |
-| `docs/internal_spec.md` | Technical specification (Japanese) |
-| `CLAUDE.md` | This file - AI assistant guide |
+**API ガイドライン**:
+- レート制限を常にグレースフルに処理
+- 可能な場合はレスポンスをキャッシュ（TLE キャッシュの例）
+- API 失敗時にユーザーフィードバックを提供
 
 ---
 
-## Common Development Tasks
+## ファイルリファレンス
 
-### Adding a New Feature
+### クイックリファレンス
 
-1. **Determine which service module** it belongs to:
-   - UI-related → `ui-utils.js`
-   - Location/maps → `location-service.js`
-   - Weather → `weather-service.js`
+| ファイル | 行数 | 目的 | 主なエクスポート |
+|---------|-----|------|----------------|
+| `index.html` | ~1200 | メインUI | - |
+| `main.js` | ~52 | エントリーポイント | - |
+| `state.js` | ~35 | 状態管理 | `AppState` |
+| `constants.js` | ~66 | 静的データ | `METEOR_SHOWERS`, `SEASONAL_OBJECTS` |
+| `ui-utils.js` | ~100 | UI ユーティリティ | `toggleAccordion`, `toggleNightVision`, `escapeHtml` |
+| `location-service.js` | ~300 | 位置情報/地図 | `getCurrentLocation`, `updateAppLocation`, `initMap` |
+| `weather-service.js` | ~800 | 気象/ダッシュボード | `fetchWeather`, `renderDashboard`, `calculateStarryScore` |
+| `iss-service.js` | ~700 | ISS 追跡 | `updateISSInfo`, `calculateISSPasses`, `drawISSSkymapCanvas` |
+| `astronomy-service.js` | ~600 | 天文イベント | `calculateSunMoonTimes`, `updateAstronomicalEvents` |
+
+### ドキュメントファイル
+
+| ファイル | 目的 |
+|---------|------|
+| `README.md` | ユーザー向けドキュメント（日本語） |
+| `CHANGELOG.md` | バージョン履歴（Keep a Changelog 形式） |
+| `docs/internal_spec.md` | 技術仕様書（日本語） |
+| `CLAUDE.md` | 本ファイル - AI 支援開発ガイド |
+
+---
+
+## よくある開発タスク
+
+### 新機能の追加
+
+1. **どのサービスモジュールに属するか決定**:
+   - UI 関連 → `ui-utils.js`
+   - 位置情報/地図 → `location-service.js`
+   - 気象 → `weather-service.js`
    - ISS → `iss-service.js`
-   - Astronomy → `astronomy-service.js`
+   - 天文 → `astronomy-service.js`
 
-2. **Write the function** in the appropriate module:
+2. **適切なモジュールに関数を記述**:
    ```javascript
    export function myNewFeature() {
-       // Implementation
+       // 実装
    }
    ```
 
-3. **If it needs state**, add to `AppState` in `state.js`
+3. **状態が必要な場合**、`state.js` の `AppState` に追加
 
-4. **If it uses static data**, add to `constants.js`
+4. **静的データを使用する場合**、`constants.js` に追加
 
-5. **Test** by calling from browser console or HTML
+5. **テスト**（ブラウザコンソールまたはHTMLから呼び出し）
 
-6. **Update CHANGELOG.md**
+6. **CHANGELOG.md を更新**
 
-7. **Bump version** and update imports
+7. **バージョンを上げて**インポートを更新
 
-### Fixing a Bug
+### バグ修正
 
-1. **Locate the bug** (check browser console for errors)
+1. **バグを特定**（ブラウザコンソールでエラーを確認）
 
-2. **Identify the module** responsible
+2. **責任のあるモジュールを特定**
 
-3. **Fix the issue**:
-   - Add null checks if data might be missing
-   - Validate API responses
-   - Handle edge cases
+3. **問題を修正**:
+   - データが欠落している可能性がある場合は null チェックを追加
+   - API レスポンスを検証
+   - エッジケースを処理
 
-4. **Test thoroughly**:
-   - Different locations
-   - Different times/dates
-   - Edge cases (null data, API failures)
+4. **徹底的にテスト**:
+   - 異なる場所
+   - 異なる時刻/日付
+   - エッジケース（null データ、API 失敗）
 
-5. **Update CHANGELOG.md** under `### Fixed`
+5. **CHANGELOG.md を更新**（`### Fixed` の下に記載）
 
-6. **Bump PATCH version** (e.g., 3.1.2 → 3.1.3)
+6. **PATCH バージョンを上げる**（例: 3.1.2 → 3.1.3）
 
-### Updating Dependencies
+### 依存関係の更新
 
-**CDN Libraries**: Update version in `index.html` `<script>` tags
+**CDN ライブラリ**: `index.html` の `<script>` タグ内のバージョンを更新
 
-Example:
+例:
 ```html
-<!-- Old -->
+<!-- 旧 -->
 <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.18/..."></script>
 
-<!-- New -->
+<!-- 新 -->
 <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/..."></script>
 ```
 
-**Testing**: Always test critical paths after updating
+**テスト**: 更新後は常に重要なパスをテスト
 
-### Refactoring
+### リファクタリング
 
-**Guidelines**:
-1. **Maintain backward compatibility** (unless major version bump)
-2. **Keep functions in window scope** for HTML event handlers
-3. **Update all imports** if moving code between modules
-4. **Run full regression testing**
+**ガイドライン**:
+1. **後方互換性を維持**（メジャーバージョンアップ以外）
+2. **関数を window スコープに保持**（HTML イベントハンドラ用）
+3. **モジュール間でコードを移動する場合はすべてのインポートを更新**
+4. **完全なリグレッションテストを実行**
 
-**Recent Example**: v3.0.0 refactoring
-- Split 3000-line file into 5 modules
-- Maintained 100% backward compatibility
-- Updated all imports with version parameters
+**最近の例**: v3.0.0 リファクタリング
+- 3000行のファイルを5つのモジュールに分割
+- 100% の後方互換性を維持
+- すべてのインポートにバージョンパラメータを更新
 
 ---
 
-## Important Notes for AI Assistants
+## AI支援開発のための重要な注意事項
 
-### Critical Rules
+### 重要なルール
 
-1. **Always update version parameters** when modifying JS files:
+1. **JS ファイルを変更する際は必ずバージョンパラメータを更新**:
    ```javascript
-   import { AppState } from './state.js?v=3.1.5';  // Update this!
+   import { AppState } from './state.js?v=3.1.5';  // これを更新！
    ```
 
-2. **Maintain Japanese language** for:
-   - Commit messages
-   - CHANGELOG entries
-   - User-facing comments
-   - Error messages shown to users
+2. **日本語を維持**する対象:
+   - コミットメッセージ
+   - CHANGELOG のエントリ
+   - ユーザー向けコメント
+   - ユーザーに表示するエラーメッセージ
 
-3. **Never break backward compatibility** without major version bump:
-   - Keep functions in `window` scope (even if also exported)
-   - Don't remove or rename public functions
+3. **後方互換性を絶対に破らない**（メジャーバージョンアップ以外）:
+   - 関数を `window` スコープに保持（エクスポートもしている場合でも）
+   - パブリック関数を削除または名前変更しない
 
-4. **Follow semantic versioning strictly**:
-   - PATCH: Bug fixes, typos, small improvements
-   - MINOR: New features, enhancements
-   - MAJOR: Breaking changes, architectural refactors
+4. **セマンティックバージョニングを厳格に守る**:
+   - PATCH: バグ修正、タイポ、小さな改善
+   - MINOR: 新機能、拡張
+   - MAJOR: 破壊的変更、アーキテクチャリファクタリング
 
-5. **Update all three version locations**:
-   - `README.md` (header and badge)
-   - `CHANGELOG.md` (new entry at top)
-   - Module imports (all `?v=X.Y.Z`)
+5. **3か所のバージョンをすべて更新**:
+   - `README.md`（ヘッダーとバッジ）
+   - `CHANGELOG.md`（先頭に新エントリを追加）
+   - モジュールインポート（すべての `?v=X.Y.Z`）
 
-### Cache Busting Strategy
+### キャッシュバスティング戦略
 
-**Problem**: Browsers and CDNs cache JavaScript modules aggressively
+**問題**: ブラウザと CDN は JavaScript モジュールを積極的にキャッシュする
 
-**Solution**: Version query parameters on ALL imports
+**解決策**: すべてのインポートにバージョンクエリパラメータ
 
-**Example**:
+**例**:
 ```javascript
 // main.js
 import { AppState } from './state.js?v=3.1.5';
 import * as uiUtils from './ui-utils.js?v=3.1.5';
 import * as locationService from './location-service.js?v=3.1.5';
-// ... update all imports when version changes
+// ... バージョン変更時にすべてのインポートを更新
 ```
 
-**When to Update**: Every time you make a change that needs to be reflected immediately (which is almost always)
+**更新タイミング**: 変更を即座に反映する必要がある場合は毎回（ほぼ常に）
 
-### Testing Checklist
+### テストチェックリスト
 
-Before committing changes:
+変更をコミットする前に:
 
-- [ ] Test on different browsers (Chrome, Firefox, Safari)
-- [ ] Test responsive design (mobile, tablet, desktop)
-- [ ] Test with different locations (Tokyo, London, New York)
-- [ ] Test ISS pass predictions (should show results within 7 days)
-- [ ] Test night vision mode toggle
-- [ ] Test favorite locations (add, remove, load)
-- [ ] Check browser console for errors
-- [ ] Verify all charts render correctly
-- [ ] Test datetime picker (past, present, future dates)
-- [ ] Verify CHANGELOG.md updated
-- [ ] Verify version numbers match across all files
+- [ ] 異なるブラウザでテスト（Chrome、Firefox、Safari）
+- [ ] レスポンシブデザインをテスト（モバイル、タブレット、デスクトップ）
+- [ ] 異なる場所でテスト（東京、ロンドン、ニューヨーク）
+- [ ] ISS パス予測をテスト（7日以内に結果が表示されるはず）
+- [ ] ナイトビジョンモード切り替えをテスト
+- [ ] お気に入り地点をテスト（追加、削除、読み込み）
+- [ ] ブラウザコンソールでエラーを確認
+- [ ] すべてのチャートが正しく描画されることを確認
+- [ ] datetime ピッカーをテスト（過去、現在、未来の日付）
+- [ ] CHANGELOG.md が更新されていることを確認
+- [ ] すべてのファイルでバージョン番号が一致することを確認
 
-### Common Pitfalls
+### よくある落とし穴
 
-1. **Forgetting version parameters**: Leads to cached old code
-2. **Breaking HTML event handlers**: They rely on window scope
-3. **Not handling null/undefined**: APIs can fail or return incomplete data
-4. **Hardcoding dates**: Use Moment.js for date calculations
-5. **Ignoring localStorage limits**: Keep favorite locations ≤ 5
-6. **Not respecting API rate limits**: Nominatim is 1 req/sec
-7. **Forgetting to update CHANGELOG**: Every release needs documentation
+1. **バージョンパラメータの忘れ**: 古いコードがキャッシュされる原因
+2. **HTML イベントハンドラの破壊**: window スコープに依存している
+3. **null/undefined の処理忘れ**: API は失敗したり不完全なデータを返すことがある
+4. **日付のハードコーディング**: 日付計算には Moment.js を使用
+5. **localStorage 制限の無視**: お気に入り地点は 5 件以下に
+6. **API レート制限の無視**: Nominatim は 1 req/秒
+7. **CHANGELOG の更新忘れ**: すべてのリリースにドキュメントが必要
 
-### Debugging Tips
+### デバッグのヒント
 
-**Browser Console Commands**:
+**ブラウザコンソールコマンド**:
 ```javascript
-// Check AppState
+// AppState を確認
 console.log(AppState);
 
-// Check weather data
+// 気象データを確認
 console.log(AppState.weather.data);
 
-// Check ISS passes
+// ISS パスを確認
 console.log(AppState.iss.calculatedPasses);
 
-// Force weather refresh
+// 気象データの強制更新
 fetchWeather();
 
-// Force ISS update
+// ISS 情報の強制更新
 updateISSInfo();
 ```
 
-**Common Issues**:
-- **ISS passes not showing**: Check TLE data loaded (`AppState.iss.tle`)
-- **Charts not rendering**: Check Chart.js loaded, data not null
-- **Location not updating**: Check geolocation permissions
-- **Stale JavaScript**: Clear browser cache, check version parameters
+**よくある問題**:
+- **ISS パスが表示されない**: TLE データが読み込まれているか確認（`AppState.iss.tle`）
+- **チャートが描画されない**: Chart.js が読み込まれているか、データが null でないか確認
+- **位置が更新されない**: 位置情報の権限を確認
+- **古い JavaScript**: ブラウザキャッシュをクリア、バージョンパラメータを確認
 
-### Performance Considerations
+### パフォーマンスの考慮事項
 
-1. **Minimize API calls**:
-   - Cache TLE data (24h)
-   - Debounce map interactions
-   - Reuse weather data for different visualizations
+1. **API 呼び出しを最小化**:
+   - TLE データをキャッシュ（24時間）
+   - 地図操作をデバウンス
+   - 異なる可視化に気象データを再利用
 
-2. **Canvas rendering**:
-   - Only redraw sky map when needed
-   - Clear intervals on component unmount
+2. **Canvas 描画**:
+   - 必要な時のみ星座図を再描画
+   - コンポーネントアンマウント時にインターバルをクリア
 
-3. **Memory leaks**:
-   - Clear intervals: `clearInterval(AppState.ui.skymapUpdateInterval)`
-   - Destroy charts before recreating: `chart.destroy()`
+3. **メモリリーク**:
+   - インターバルをクリア: `clearInterval(AppState.ui.skymapUpdateInterval)`
+   - 再作成前にチャートを破棄: `chart.destroy()`
 
-### Accessibility
+### アクセシビリティ
 
-**Current State**: Basic accessibility implemented
+**現状**: 基本的なアクセシビリティを実装済み
 
-**Improvements Needed**:
-- Add ARIA labels to all interactive elements
-- Keyboard navigation for map
-- Screen reader support for charts (alt text, data tables)
-- High contrast mode support
+**改善が必要な点**:
+- すべてのインタラクティブ要素に ARIA ラベルを追加
+- 地図のキーボードナビゲーション
+- チャートのスクリーンリーダーサポート（代替テキスト、データテーブル）
+- ハイコントラストモードのサポート
 
-**Color Blindness**: Night vision mode helps, but consider additional modes
+**色覚異常への配慮**: ナイトビジョンモードは有用だが、追加モードも検討を
 
 ---
 
-## Version History Highlights
+## バージョン履歴ハイライト
 
 ### v3.1.5 (2026-01-17)
-- ISS sky map real-time update mode
-- Pass prediction toggle improvements
+- ISS 星座図のリアルタイム更新モード
+- パス予測切り替え機能の改善
 
 ### v3.1.3 (2026-01-17)
-- Module import version parameters across all files
-- ISS orbit calculation timeout and async improvements
+- すべてのファイルでモジュールインポートのバージョンパラメータを追加
+- ISS 軌道計算のタイムアウトと非同期処理の改善
 
-### v3.0.0 (2026-01-17) - MAJOR REFACTOR
-- Split monolithic `functions.js` into 5 service modules
-- Introduced ES Modules architecture
-- Centralized state management (`AppState`)
-- Maintained 100% backward compatibility
+### v3.0.0 (2026-01-17) - 大規模リファクタリング
+- モノリシックな `functions.js` を5つのサービスモジュールに分割
+- ES Modules アーキテクチャの導入
+- 状態管理の一元化（`AppState`）
+- 100% の後方互換性を維持
 
 ### v2.14.0 (2026-01-17)
-- Night observation timeline with cloud cover data
-- 4-tier color coding based on cloud density
+- 雲量データを反映した夜間観測タイムライン
+- 雲密度に基づく4段階の色分け
 
 ### v2.12.0 (2026-01-16)
-- ISS pass notifications (1-hour advance warning)
-- Browser and in-app banner notifications
+- ISS 通過通知（1時間前警告）
+- ブラウザとアプリ内バナー通知
 
 ### v2.11.0 (2026-01-16)
-- Astrophotography exposure calculator
-- 500 rule + NPF method implementation
+- 天体写真露出計算機
+- 500ルール + NPF 方式の実装
 
 ### v2.10.0 (2026-01-16)
-- Atmospheric transparency and seeing indicators
-- Observation-type specific advice
+- 大気透明度とシーイング指標
+- 観測タイプ別アドバイス
 
 ---
 
-## Contact & Support
+## 連絡先とサポート
 
-**Project Repository**: [github.com/Masakai/weather_dashboard](https://github.com/Masakai/weather_dashboard)
+**プロジェクトリポジトリ**: [github.com/Masakai/weather_dashboard](https://github.com/Masakai/weather_dashboard)
 
-**Organization**: 株式会社リバーランズ・コンサルティング
+**開発元**: 株式会社リバーランズ・コンサルティング
 
-**License**: MIT License
+**ライセンス**: MIT License
 
 ---
 
-## For Future AI Assistants
+## 今後の AI 支援開発者へ
 
-When working on this project:
+このプロジェクトで作業する際は:
 
-1. **Read this file first** before making changes
-2. **Understand the module structure** - don't add code to random files
-3. **Respect the Japanese language requirements** - commit messages, user-facing text
-4. **Test thoroughly** - this is a user-facing application
-5. **Document your changes** - update CHANGELOG.md
-6. **Version properly** - semantic versioning is not optional
-7. **Think about cache** - always update version parameters
-8. **Maintain quality** - this is production code used by real stargazers
+1. **変更を加える前にこのファイルを読む**
+2. **モジュール構造を理解する** - ランダムなファイルにコードを追加しない
+3. **日本語要件を尊重する** - コミットメッセージ、ユーザー向けテキスト
+4. **徹底的にテストする** - これはユーザー向けアプリケーション
+5. **変更を文書化する** - CHANGELOG.md を更新
+6. **適切にバージョニング** - セマンティックバージョニングは必須
+7. **キャッシュを意識する** - 常にバージョンパラメータを更新
+8. **品質を維持する** - これは実際の天体観測者が使用する本番コード
 
-**Remember**: This application helps people experience the wonder of the night sky. Handle it with care and attention to detail.
+**忘れずに**: このアプリケーションは、人々が夜空の神秘を体験する手助けをしています。細心の注意を払って扱ってください。
 
 ---
 
 **Happy coding! 🌟**
 
-*Last updated: 2026-01-17 by Claude (AI Assistant)*
+*最終更新: 2026-01-17 by Claude (AI Assistant)*
