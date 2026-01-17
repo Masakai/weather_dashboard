@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.3] - 2026-01-17
+
+### Fixed
+- `iss-service.js`: ISSのTLEデータ取得にタイムアウトを追加し、パス計算処理を非同期化。これにより、リモート環境での「計算中」のまま固まる問題を解消。
+- キャッシュ対策: 全モジュール間のインポートにバージョンクエリを追加し、更新内容が確実に反映されるように改善。
+
 ## [3.1.2] - 2026-01-17
 
 ### Fixed
