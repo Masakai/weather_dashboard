@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2026-01-17
+
+### Fixed
+- `ui-utils.js`: `escapeHtml` 関数が値を返していなかったため、お気に入り登録時に名前が `undefined` と表示される不具合を修正。
+
 ## [3.1.0] - 2026-01-17
 
 ### Fixed
