@@ -1,4 +1,4 @@
-import { AppState } from './state.js';
+import { AppState } from './state.js?v=3.1.3';
 
 export function requestISSNotificationPermission() {
     if ('Notification' in window) {
@@ -155,7 +155,16 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
         if (!AppState.iss.tle) {
             // CelesTrakからISSのTLEを取得
             try {
-                const response = await fetch('https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle&NAME=ISS');
+                // タイムアウト設定 (5秒)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch('https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle&NAME=ISS', {
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+
                 if (response.ok) {
                     const text = await response.text();
                     const lines = text.split('\n');
@@ -173,7 +182,7 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
                     }
                 }
             } catch (e) {
-                console.warn('TLEの取得に失敗しました。予備データを使用します。', e);
+                console.warn('TLEの取得に失敗またはタイムアウトしました。予備データを使用します。', e);
             }
 
             if (!AppState.iss.tle) {
@@ -337,20 +346,36 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
         }
     } catch (error) {
         console.error('ISS計算エラー:', error);
-        container.innerHTML = '<div class="text-red-400">ISS情報の計算に失敗しました</div>';
+        if (container) {
+            container.innerHTML = '<div class="text-red-400">ISS情報の計算に失敗しました: ' + error.message + '</div>';
+        }
+        // パス予測リストもエラー表示にする
+        const passContainer = document.getElementById('iss-passes-list');
+        if (passContainer && passContainer.innerHTML.includes('計算中')) {
+            passContainer.innerHTML = '<div class="text-red-400 text-xs">データの取得に失敗したため計算を中断しました</div>';
+        }
+        return; // エラー時は中断
     }
 
     // 初回のみパス予測を自動計算
     if (!window.issPassesCalculated) {
-        calculateISSPasses();
-        window.issPassesCalculated = true;
+        window.issPassesCalculated = true; // 先にフラグを立てて重複防止
+        calculateISSPasses(); // asyncとして呼び出す（待機はしない）
     }
 }
-export function calculateISSPasses() {
+export async function calculateISSPasses() {
     const container = document.getElementById('iss-passes-list');
+    if (!container) return;
+
     container.innerHTML = '<div class="text-slate-400 text-xs">計算中...</div>';
 
     try {
+        // ライブラリチェック
+        if (typeof satellite === 'undefined' || typeof moment === 'undefined') {
+            container.innerHTML = '<div class="text-red-400 text-xs">ライブラリの読み込みに失敗しました</div>';
+            return;
+        }
+
         if (!window.currentTLE || !AppState.location.lat || !AppState.location.lon) {
             container.innerHTML = '<div class="text-red-400 text-xs">TLEデータが取得できていません</div>';
             return;
@@ -368,7 +393,14 @@ export function calculateISSPasses() {
         let maxElevationTime = null;
         let maxDistance = 0;
 
-        for (let time = now.getTime(); time <= endTime.getTime(); time += interval) {
+        console.time('ISS Pass Calculation');
+
+        // 計算を分割してメインスレッドをブロックしないようにする
+        const totalSteps = Math.floor((endTime.getTime() - now.getTime()) / interval);
+        const stepsPerChunk = 500; // 500回計算ごとに制御を戻す
+
+        for (let step = 0; step <= totalSteps; step++) {
+            const time = now.getTime() + step * interval;
             const date = new Date(time);
             const positionAndVelocity = satellite.propagate(satrec, date);
 
@@ -387,7 +419,7 @@ export function calculateISSPasses() {
 
                 const elevation = satellite.radiansToDegrees(lookAngles.elevation);
                 const azimuth = satellite.radiansToDegrees(lookAngles.azimuth);
-                const distance = lookAngles.rangeSat;
+                const distance = lookAngles.rangeSat || lookAngles.range; // 互換性のため
 
                 if (elevation > 0) {
                     // パス中
@@ -428,7 +460,14 @@ export function calculateISSPasses() {
                     }
                 }
             }
+
+            // 一定ステップごとにUIスレッドに制御を戻す
+            if (step % stepsPerChunk === 0 && step > 0) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
         }
+
+        console.timeEnd('ISS Pass Calculation');
 
         // ループ終了時に未完了のパスがあれば追加（ISSがまだ地平線上の場合）
         if (currentPass) {
