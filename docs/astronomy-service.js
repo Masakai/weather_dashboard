@@ -159,6 +159,17 @@ export function renderTimeline(todayTimes, nextDayTimes, targetDate, hourlyData 
         container.appendChild(div);
     });
 
+    // 現在時刻インジケーター（ターゲット時刻）
+    const targetMoment = moment(targetDate);
+    if (targetMoment.isBetween(timelineStart, timelineEnd)) {
+        const targetPos = ((targetMoment - timelineStart) / timelineDuration) * 100;
+        const indicator = document.createElement('div');
+        indicator.className = 'absolute top-0 w-0.5 h-full bg-red-500 z-10';
+        indicator.style.left = `${targetPos}%`;
+        indicator.innerHTML = '<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[10px] px-1 rounded shadow-lg whitespace-nowrap">選択中</div>';
+        container.appendChild(indicator);
+    }
+
     // 時間ラベルを動的に生成
     const labels = [];
     labels.push(timelineStart.format('HH:mm')); // 開始（日没）
@@ -178,38 +189,56 @@ export function renderTimeline(todayTimes, nextDayTimes, targetDate, hourlyData 
     labels.push(timelineEnd.format('HH:mm')); // 終了（日の出）
 
     // ラベルを描画
+    labelsContainer.innerHTML = ''; // クリア
     labels.forEach(label => {
         const span = document.createElement('span');
         span.textContent = label;
         labelsContainer.appendChild(span);
     });
 }
-export async function updateISSInfo(observerDate, observerLat, observerLon) {
-    const container = document.getElementById('iss-info');
 
-    // 既存のインターバルをクリア
-    if (AppState.iss.interval) clearInterval(AppState.iss.interval);
+export function calculateMoonData(date) {
+    // 簡易的な月齢計算
+    const baseDate = new Date(2000, 0, 6, 18, 14, 0);
+    const cycle = 29.530588853;
+    const diff = (date.getTime() - baseDate.getTime()) / (24 * 60 * 60 * 1000);
+    const age = (diff % cycle + cycle) % cycle;
+    
+    let icon, phaseName;
+    if (age < 1 || age >= 28.5) { icon = '🌑'; phaseName = '新月'; }
+    else if (age < 6.5) { icon = '🌙'; phaseName = '三日月'; }
+    else if (age < 8.5) { icon = '🌓'; phaseName = '上弦の月'; }
+    else if (age < 14) { icon = '🌔'; phaseName = '十三夜月'; }
+    else if (age < 16) { icon = '🌕'; phaseName = '満月'; }
+    else if (age < 21) { icon = '🌖'; phaseName = '寝待月'; }
+    else if (age < 23) { icon = '🌗'; phaseName = '下弦の月'; }
+    else { icon = '🌘'; phaseName = '明けの三日月'; }
 
-    // 現在時刻との差を確認（1分以内なら「現在」とみなす）
-    const now = new Date();
-    const timeDiff = Math.abs(observerDate.getTime() - now.getTime());
-    const isCurrentTime = timeDiff < 60000; // 1分以内
-
-    if (isCurrentTime) {
-        // 現在時刻の場合のみリアルタイム更新を有効化
-        AppState.iss.interval = setInterval(() => {
-            const currentNow = new Date();
-            calculateAndDisplayISS(currentNow, observerLat, observerLon);
-        }, 3000); // 3秒ごとに更新
-    }
-    // 日時指定の場合はリアルタイム更新なし（指定時刻で固定）
-
-    // 初回計算（指定された日時で表示）
-    await calculateAndDisplayISS(observerDate, observerLat, observerLon);
+    return {
+        age: age.toFixed(1),
+        icon: icon,
+        phaseName: phaseName
+    };
 }
 
-    openISSSkymapModal();
+export function calculateCelestialEvents(date, lat, lon) {
+    const events = [];
+    const momentDate = moment(date);
+    METEOR_SHOWERS.forEach(shower => {
+        const peak = moment(`${momentDate.year()}-${shower.peak}`, 'YYYY-MM-DD');
+        const diff = peak.diff(momentDate, 'days');
+        if (Math.abs(diff) <= 7) {
+            events.push({
+                name: shower.name,
+                date: peak.format('M/D'),
+                type: 'meteor',
+                description: diff === 0 ? '本日極大！' : (diff > 0 ? `${diff}日後が極大` : `${Math.abs(diff)}日前が極大`)
+            });
+        }
+    });
+    return events;
 }
+
 export function calculateVisiblePlanets(observerDate, observerLat, observerLon) {
     try {
         const observer = new Astronomy.Observer(observerLat, observerLon, 0);
@@ -1072,3 +1101,5 @@ export function updateAstronomicalEvents(targetDate) {
         }
     } catch (error) {
         console.error('天文イベント計算エラー:', error);
+    }
+}

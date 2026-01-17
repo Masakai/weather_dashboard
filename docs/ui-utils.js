@@ -1,5 +1,4 @@
 import { AppState } from './state.js';
-import { AppState } from './state.js';
 import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js';
 
 export function toggleNightVision() {
@@ -18,10 +17,9 @@ export function toggleAccordion(id) {
         content.classList.add('hidden');
         icon.style.transform = 'rotate(0deg)';
     }
-
-    }
 }
 // XSS対策: HTMLエスケープ関数
 export function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
+}

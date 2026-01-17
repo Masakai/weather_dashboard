@@ -1,8 +1,6 @@
 import { AppState } from './state.js';
 import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js';
-    localStorage.setItem('favoriteLocations', JSON.stringify(AppState.location.favoriteLocations));
-    renderFavoriteLocations();
-}
+
 export function calculateStarryScore(cloudCover, moonAge, humidity, visibility = 24, windSpeed = 5) {
     // 雲量スコア (0-100) - 雲が少ないほど高い
     const cloudScore = Math.max(0, 100 - cloudCover);
@@ -46,8 +44,70 @@ export function updateStarryScore(score) {
     } else if (score >= 20) {
         comment.textContent = '☁️ やや条件が悪いです。観測には忍耐が必要かも';
     } else {
-        container.innerHTML = '<div class="text-slate-400 text-xs">天文イベントの計算に失敗しました。</div>';
+        comment.textContent = '☁️ 観測には不向きな条件です。空は雲に覆われています';
     }
+}
+export function renderRadarChart(data) {
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    
+    if (AppState.ui.charts.radar) {
+        AppState.ui.charts.radar.destroy();
+    }
+
+    AppState.ui.charts.radar = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['雲の少なさ', '月の暗さ', '低湿度', '視程の良さ', '風の弱さ'],
+            datasets: [{
+                label: '観測適性指標',
+                data: [
+                    data.cloudClearness,
+                    data.moonDarkness,
+                    data.lowHumidity,
+                    data.goodVisibility,
+                    data.calmWind
+                ],
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    pointLabels: {
+                        color: '#94a3b8',
+                        font: {
+                            size: 11
+                        }
+                    },
+                    ticks: {
+                        display: false,
+                        stepSize: 20
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
 }
 export async function fetchWeather(lat, lon) {
     // API URL (追加気象データを含む)
@@ -499,3 +559,88 @@ export function renderDashboard(targetMoment) {
     daily.time.forEach((t, i) => {
         const date = moment(t);
         const isSelectedDay = date.isSame(targetMoment, 'day');
+
+        const weatherInfo = getWeatherInfo(daily.weathercode[i]);
+        const maxTemp = daily.temperature_2m_max[i];
+        const minTemp = daily.temperature_2m_min[i];
+        const rainSum = daily.precipitation_sum[i];
+        const rainProb = daily.precipitation_probability_max[i];
+        
+        // 月齢計算
+        const moonInfo = calculateMoonData(date.toDate());
+
+        // 1時間ごとのデータから、この日の平均雲量と湿度を計算
+        const dateStr = t; // "YYYY-MM-DD"
+        let cloudSum = 0;
+        let humSum = 0;
+        let count = 0;
+        
+        // データ量が少ないので単純ループで集計
+        hourly.time.forEach((hTime, hIndex) => {
+            if (hTime.startsWith(dateStr)) {
+                cloudSum += hourly.cloud_cover[hIndex];
+                humSum += hourly.relative_humidity_2m[hIndex];
+                count++;
+            }
+        });
+        
+        const avgCloud = count > 0 ? Math.round(cloudSum / count) : '-';
+        const avgHum = count > 0 ? Math.round(humSum / count) : '-';
+
+        const row = document.createElement('tr');
+        // cursor-pointer を追加、onclickを追加
+        row.className = `border-b border-slate-700/50 transition cursor-pointer ${isSelectedDay ? 'bg-blue-500/20 border-l-4 border-l-blue-400' : 'hover:bg-white/5'}`;
+        row.onclick = () => selectDate(t); // クリックイベント
+
+        row.innerHTML = `
+            <td class="py-4 px-2">
+                <div class="font-bold ${isSelectedDay ? 'text-blue-300' : 'text-white'}">${date.format('M/D')}</div>
+                <div class="text-xs text-slate-400">${date.format('ddd')}</div>
+            </td>
+            <td class="py-4 px-2">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="${weatherInfo.icon}" class="${weatherInfo.color} w-6 h-6"></i>
+                    <span class="hidden md:inline text-sm">${weatherInfo.label}</span>
+                </div>
+            </td>
+            <td class="py-4 px-2 text-center">
+                <div class="text-sm">${rainProb !== null ? rainProb + '%' : '-'}</div>
+                <div class="text-xs text-blue-300">${rainSum > 0 ? rainSum + 'mm' : ''}</div>
+            </td>
+             <td class="py-4 px-2 text-center">
+                <div class="text-sm font-semibold">${avgCloud !== '-' ? avgCloud + '%' : '-'}</div>
+                <div class="w-16 bg-slate-700/50 rounded-full h-1 mx-auto mt-1">
+                    <div class="bg-slate-400 h-1 rounded-full" style="width: ${avgCloud !== '-' ? avgCloud : 0}%"></div>
+                </div>
+            </td>
+            <td class="py-4 px-2 text-center">
+                <div class="text-sm font-semibold text-blue-200 flex items-center justify-center gap-1">
+                    <i data-lucide="droplet" class="w-3 h-3"></i>
+                    ${avgHum !== '-' ? avgHum + '%' : '-'}
+                </div>
+            </td>
+             <td class="py-4 px-2 text-center">
+                <div class="text-lg" title="${moonInfo.phaseName} (月齢${moonInfo.age})">${moonInfo.icon}</div>
+                <div class="text-xs text-slate-400">${moonInfo.age}</div>
+            </td>
+            <td class="py-4 px-2 text-right">
+                <span class="font-bold text-orange-400">${maxTemp}°</span> 
+                <span class="text-slate-500 mx-1">/</span> 
+                <span class="text-blue-300">${minTemp}°</span>
+            </td>
+        `;
+        weeklyBody.appendChild(row);
+    });
+    
+    lucide.createIcons();
+
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('dashboard-content').classList.remove('hidden');
+
+    // ISS星図モーダルが開いている場合は再描画
+    const skymapModal = document.getElementById('iss-skymap-modal');
+    if (skymapModal && !skymapModal.classList.contains('hidden')) {
+        console.log('星図を再描画します。時刻:', targetDate);
+        drawISSSkymapCanvas(targetDate);
+    }
+}

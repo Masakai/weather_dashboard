@@ -1,11 +1,6 @@
 import { AppState } from './state.js';
 import { escapeHtml } from './ui-utils.js';
-    if (AppState.iss.notificationInterval) {
-        clearInterval(AppState.iss.notificationInterval);
-        AppState.iss.notificationInterval = null;
-        console.log('ISS通過通知チェックを停止しました');
-    }
-}
+
 export function addFavoriteLocation() {
     const name = prompt('この地点の名前を入力してください:', document.getElementById('location-name').innerText || '未設定');
     if (name) {
@@ -17,7 +12,8 @@ export function addFavoriteLocation() {
         AppState.location.favoriteLocations.push(location);
         if (AppState.location.favoriteLocations.length > 5) AppState.location.favoriteLocations.shift(); // 最大5件
         localStorage.setItem('favoriteLocations', JSON.stringify(AppState.location.favoriteLocations));
-    return div.innerHTML;
+        renderFavoriteLocations();
+    }
 }
 
 export function renderFavoriteLocations(locations = AppState.location.favoriteLocations) {
@@ -55,8 +51,8 @@ export function loadFavoriteLocation(index) {
 }
 export function removeFavoriteLocation(index) {
     AppState.location.favoriteLocations.splice(index, 1);
-        comment.textContent = '❌ 観測には不向きな条件です';
-    }
+    localStorage.setItem('favoriteLocations', JSON.stringify(AppState.location.favoriteLocations));
+    renderFavoriteLocations();
 }
 export function getCurrentLocation(isInitial = false) {
     if (!navigator.geolocation) {
@@ -178,3 +174,6 @@ export function updateMapMarker(lat, lon) {
 }
 export function getWindDirection(degrees) {
     const directions = ['北', '北北東', '北東', '東北東', '東', '東南東', '南東', '南南東', '南', '南南西', '南西', '西南西', '西', '西北西', '北西', '北北西'];
+    const index = Math.round(degrees / 22.5) % 16;
+    return directions[index];
+}

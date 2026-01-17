@@ -1,7 +1,5 @@
 import { AppState } from './state.js';
-    // Lucideアイコンを再初期化
-    lucide.createIcons();
-}
+
 export function requestISSNotificationPermission() {
     if ('Notification' in window) {
         Notification.requestPermission().then(permission => {
@@ -92,6 +90,30 @@ export function closeISSNotification() {
     const banner = document.getElementById('iss-notification-banner');
     banner.classList.add('hidden');
 }
+export async function updateISSInfo(observerDate, observerLat, observerLon) {
+    // 既存のインターバルをクリア
+    if (AppState.iss.interval) {
+        clearInterval(AppState.iss.interval);
+        AppState.iss.interval = null;
+    }
+
+    // 現在時刻との差を確認（1分以内なら「現在」とみなす）
+    const now = new Date();
+    const timeDiff = Math.abs(observerDate.getTime() - now.getTime());
+    const isCurrentTime = timeDiff < 60000; // 1分以内
+
+    if (isCurrentTime) {
+        // 現在時刻の場合のみリアルタイム更新を有効化
+        AppState.iss.interval = setInterval(() => {
+            const currentNow = new Date();
+            calculateAndDisplayISS(currentNow, observerLat, observerLon);
+        }, 3000); // 3秒ごとに更新
+    }
+
+    // 初回計算
+    await calculateAndDisplayISS(observerDate, observerLat, observerLon);
+}
+
 export function startISSNotificationCheck() {
     // 既存のintervalをクリア
     if (AppState.iss.notificationInterval) {
@@ -109,6 +131,13 @@ export function startISSNotificationCheck() {
     console.log('ISS通過通知チェックを開始しました');
 }
 export function stopISSNotificationCheck() {
+    if (AppState.iss.notificationInterval) {
+        clearInterval(AppState.iss.notificationInterval);
+        AppState.iss.notificationInterval = null;
+    }
+    console.log('ISS通過通知チェックを停止しました');
+}
+
 export async function calculateAndDisplayISS(date, observerLat, observerLon) {
     const container = document.getElementById('iss-info');
     try {
@@ -488,89 +517,8 @@ export function showPassOnSkymap(passIndex) {
         clearInterval(AppState.ui.skymapUpdateInterval);
         AppState.ui.skymapUpdateInterval = null;
     }
-        const weatherInfo = getWeatherInfo(daily.weathercode[i]);
-        const maxTemp = daily.temperature_2m_max[i];
-        const minTemp = daily.temperature_2m_min[i];
-        const rainSum = daily.precipitation_sum[i];
-        const rainProb = daily.precipitation_probability_max[i];
-        
-        // 月齢計算
-        const moonInfo = calculateMoonData(date.toDate());
 
-        // 1時間ごとのデータから、この日の平均雲量と湿度を計算
-        const dateStr = t; // "YYYY-MM-DD"
-        let cloudSum = 0;
-        let humSum = 0;
-        let count = 0;
-        
-        // データ量が少ないので単純ループで集計
-        hourly.time.forEach((hTime, hIndex) => {
-            if (hTime.startsWith(dateStr)) {
-                cloudSum += hourly.cloud_cover[hIndex];
-                humSum += hourly.relative_humidity_2m[hIndex];
-                count++;
-            }
-        });
-        
-        const avgCloud = count > 0 ? Math.round(cloudSum / count) : '-';
-        const avgHum = count > 0 ? Math.round(humSum / count) : '-';
-
-        const row = document.createElement('tr');
-        // cursor-pointer を追加、onclickを追加
-        row.className = `border-b border-slate-700/50 transition cursor-pointer ${isSelectedDay ? 'bg-blue-500/20 border-l-4 border-l-blue-400' : 'hover:bg-white/5'}`;
-        row.onclick = () => selectDate(t); // クリックイベント
-
-        row.innerHTML = `
-            <td class="py-4 px-2">
-                <div class="font-bold ${isSelectedDay ? 'text-blue-300' : 'text-white'}">${date.format('M/D')}</div>
-                <div class="text-xs text-slate-400">${date.format('ddd')}</div>
-            </td>
-            <td class="py-4 px-2">
-                <div class="flex items-center gap-3">
-                    <i data-lucide="${weatherInfo.icon}" class="${weatherInfo.color} w-6 h-6"></i>
-                    <span class="hidden md:inline text-sm">${weatherInfo.label}</span>
-                </div>
-            </td>
-            <td class="py-4 px-2 text-center">
-                <div class="text-sm">${rainProb !== null ? rainProb + '%' : '-'}</div>
-                <div class="text-xs text-blue-300">${rainSum > 0 ? rainSum + 'mm' : ''}</div>
-            </td>
-             <td class="py-4 px-2 text-center">
-                <div class="text-sm font-semibold">${avgCloud !== '-' ? avgCloud + '%' : '-'}</div>
-                <div class="w-16 bg-slate-700/50 rounded-full h-1 mx-auto mt-1">
-                    <div class="bg-slate-400 h-1 rounded-full" style="width: ${avgCloud !== '-' ? avgCloud : 0}%"></div>
-                </div>
-            </td>
-            <td class="py-4 px-2 text-center">
-                <div class="text-sm font-semibold text-blue-200 flex items-center justify-center gap-1">
-                    <i data-lucide="droplet" class="w-3 h-3"></i>
-                    ${avgHum !== '-' ? avgHum + '%' : '-'}
-                </div>
-            </td>
-             <td class="py-4 px-2 text-center">
-                <div class="text-lg" title="${moonInfo.phaseName} (月齢${moonInfo.age})">${moonInfo.icon}</div>
-                <div class="text-xs text-slate-400">${moonInfo.age}</div>
-            </td>
-            <td class="py-4 px-2 text-right">
-                <span class="font-bold text-orange-400">${maxTemp}°</span> 
-                <span class="text-slate-500 mx-1">/</span> 
-                <span class="text-blue-300">${minTemp}°</span>
-            </td>
-        `;
-        weeklyBody.appendChild(row);
-    });
-    
-    lucide.createIcons();
-
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('dashboard-content').classList.remove('hidden');
-
-    // ISS星図モーダルが開いている場合は再描画
-    const skymapModal = document.getElementById('iss-skymap-modal');
-    if (skymapModal && !skymapModal.classList.contains('hidden')) {
-        console.log('星図を再描画します。時刻:', targetDate);
-        drawISSSkymapCanvas(targetDate);
-    }
+    openISSSkymapModal();
 }
 export function openISSSkymapModal(forcedDate = null) {
     const modal = document.getElementById('iss-skymap-modal');
