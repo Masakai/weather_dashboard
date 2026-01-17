@@ -376,6 +376,7 @@ escapeHtml関数にnull/undefinedガードを追加し、main.jsのキャッシ�
 2. `CHANGELOG.md`（先頭に新エントリを追加）
 3. `docs/CHANGELOG.md`（同期を保つ）
 4. JS ファイルのすべてのモジュールインポート（`?v=X.Y.Z` を更新）
+5. docs/index.html(バージョン情報を更新)
 
 ### プルリクエストワークフロー
 
