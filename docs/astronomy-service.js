@@ -1,5 +1,5 @@
-import { AppState } from './state.js?v=3.2.0';
-import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.2.0';
+import { AppState } from './state.js?v=3.2.1';
+import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.2.1';
 export function calculateSunMoonTimes(date, lat, lon) {
     try {
         const observer = new Astronomy.Observer(lat, lon, 0);
@@ -1544,7 +1544,11 @@ export function updateAstronomicalEvents(targetDate) {
 
             console.log('検出された日食の数:', solarEclipses.length);
 
-            // 日食を追加
+            // 日食を追加（現在地での観測可能性をチェック）
+            const observerLat = AppState.location.lat || 35.6762;
+            const observerLon = AppState.location.lon || 139.6503;
+            const observer = new Astronomy.Observer(observerLat, observerLon, 0);
+
             solarEclipses.forEach(eclipse => {
                 // peak.date で Date オブジェクトを取得
                 const peakDate = moment(eclipse.peak.date || eclipse.peak);
@@ -1555,17 +1559,40 @@ export function updateAstronomicalEvents(targetDate) {
                 const timeText = daysUntil === 0 ? '今日' :
                                daysUntil > 0 ? `${daysUntil}日後` : `${-daysUntil}日前`;
 
-                events.push({
-                    date: peakDate,
-                    type: typeText,
-                    time: peakDate.format('M月D日 HH:mm'),
-                    daysUntil: daysUntil,
-                    timeText: timeText,
-                    icon: '🌑',
-                    color: 'yellow',
-                    note: '観測可能地域は限定的です',
-                    rawData: eclipse
-                });
+                // 現在地での観測可能性をチェック
+                let isObservable = false;
+                try {
+                    // 現在地での太陽の高度をチェック
+                    const sunEquator = Astronomy.Equator('Sun', eclipse.peak.date || eclipse.peak, observer, true, true);
+                    const sunHorizon = Astronomy.Horizon(eclipse.peak.date || eclipse.peak, observer, sunEquator.ra, sunEquator.dec, 'normal');
+
+                    // 太陽が地平線上にある場合のみ観測可能
+                    if (sunHorizon.altitude > 0) {
+                        // さらに、現地で日食が起こるかをチェック
+                        const localEclipse = Astronomy.SearchLocalSolarEclipse(eclipse.peak.date || eclipse.peak, observer);
+                        if (localEclipse && localEclipse.kind !== 'none') {
+                            isObservable = true;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('日食の観測可能性チェックエラー:', error);
+                    // エラーの場合は表示しない（安全側に倒す）
+                }
+
+                // 観測可能な日食のみを表示
+                if (isObservable) {
+                    events.push({
+                        date: peakDate,
+                        type: typeText,
+                        time: peakDate.format('M月D日 HH:mm'),
+                        daysUntil: daysUntil,
+                        timeText: timeText,
+                        icon: '🌑',
+                        color: 'yellow',
+                        note: '現在地から観測可能',
+                        rawData: eclipse
+                    });
+                }
             });
         } catch (error) {
             console.error('日食検索エラー:', error);

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.1] - 2026-01-18
+
+### Fixed
+- `astronomy-service.js`: 日食イベント表示時の観測可能性判定を修正
+  - 日食の時刻に現在地で太陽が地平線下にある場合（夜間）は、イベントリストに表示しないように改善
+  - 太陽の高度チェック（`Astronomy.Horizon`）を追加し、地平線上にある場合のみ観測可能と判定
+  - 現地での日食観測可能性（`Astronomy.SearchLocalSolarEclipse`）をチェック
+  - これにより、夜間に発生する日食が「観測可能」と誤表示される問題を解決し、情報の信頼性を向上
+
+### Improved
+- 日食イベントの表示注釈を「観測可能地域は限定的です」から「現在地から観測可能」に変更し、より正確な情報を提供
+
 ## [3.2.0] - 2026-01-18
 
 ### Added
