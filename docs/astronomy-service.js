@@ -1,5 +1,5 @@
-import { AppState } from './state.js?v=3.1.9';
-import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.1.9';
+import { AppState } from './state.js?v=3.2.0';
+import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.2.0';
 export function calculateSunMoonTimes(date, lat, lon) {
     try {
         const observer = new Astronomy.Observer(lat, lon, 0);
@@ -999,6 +999,421 @@ export function updateRecommendedObjects(moonAge) {
         `).join('')}
     `;
 }
+// 天文イベント詳細情報を取得する関数
+export function getEclipseDetails(eclipse, eventType, observerLat, observerLon) {
+    try {
+        const details = {
+            type: eventType,
+            rawData: eclipse
+        };
+
+        if (eventType.includes('月食')) {
+            // 月食の詳細情報
+            const peak = eclipse.peak.date || eclipse.peak;
+            details.peakTime = moment(peak).format('YYYY年M月D日 HH:mm');
+
+            // 月食の継続時間
+            if (eclipse.sd_total && eclipse.sd_total > 0) {
+                details.totalDuration = Math.round(eclipse.sd_total * 2);
+                details.totalStart = moment(peak).subtract(eclipse.sd_total, 'minutes').format('HH:mm');
+                details.totalEnd = moment(peak).add(eclipse.sd_total, 'minutes').format('HH:mm');
+            }
+
+            if (eclipse.sd_partial && eclipse.sd_partial > 0) {
+                details.partialDuration = Math.round(eclipse.sd_partial * 2);
+                details.partialStart = moment(peak).subtract(eclipse.sd_partial, 'minutes').format('HH:mm');
+                details.partialEnd = moment(peak).add(eclipse.sd_partial, 'minutes').format('HH:mm');
+            }
+
+            if (eclipse.sd_penum && eclipse.sd_penum > 0) {
+                details.penumbralDuration = Math.round(eclipse.sd_penum * 2);
+                details.penumbralStart = moment(peak).subtract(eclipse.sd_penum, 'minutes').format('HH:mm');
+                details.penumbralEnd = moment(peak).add(eclipse.sd_penum, 'minutes').format('HH:mm');
+            }
+
+            // 月食は世界中で観測可能
+            details.visibilityNote = '月が地平線上にある地域では世界中で観測できます。';
+            details.observable = true;
+
+        } else if (eventType.includes('日食')) {
+            // 日食の詳細情報
+            const peak = eclipse.peak.date || eclipse.peak;
+            details.peakTime = moment(peak).format('YYYY年M月D日 HH:mm');
+
+            // ユーザーの位置での日食の見え方を計算
+            try {
+                const observer = new Astronomy.Observer(observerLat, observerLon, 0);
+                const localEclipse = Astronomy.SearchLocalSolarEclipse(peak, observer);
+
+                if (localEclipse && localEclipse.kind !== 'none') {
+                    details.observable = true;
+
+                    // 観測可能な場合の詳細情報
+                    const localKind = localEclipse.kind === 'total' ? '皆既日食' :
+                                    localEclipse.kind === 'annular' ? '金環日食' :
+                                    localEclipse.kind === 'partial' ? '部分日食' : '日食';
+                    details.localType = localKind;
+
+                    if (localEclipse.partial_begin) {
+                        details.partialStart = moment(localEclipse.partial_begin.date).format('HH:mm');
+                    }
+                    if (localEclipse.total_begin) {
+                        details.totalStart = moment(localEclipse.total_begin.date).format('HH:mm');
+                    }
+                    if (localEclipse.peak) {
+                        details.localPeak = moment(localEclipse.peak.date).format('HH:mm');
+                        details.obscuration = (localEclipse.obscuration * 100).toFixed(1);
+                    }
+                    if (localEclipse.total_end) {
+                        details.totalEnd = moment(localEclipse.total_end.date).format('HH:mm');
+                    }
+                    if (localEclipse.partial_end) {
+                        details.partialEnd = moment(localEclipse.partial_end.date).format('HH:mm');
+                    }
+
+                    details.visibilityNote = `現在の位置（緯度${observerLat.toFixed(2)}°、経度${observerLon.toFixed(2)}°）から観測できます。`;
+                } else {
+                    details.observable = false;
+                    details.visibilityNote = '残念ながら、現在の位置からは観測できません。観測可能な地域は限定されています。';
+                }
+            } catch (error) {
+                console.error('ローカル日食計算エラー:', error);
+                details.observable = null;
+                details.visibilityNote = '観測可能地域の詳細は計算できませんでしたが、日食が発生します。観測可能な地域は限定的です。';
+            }
+        }
+
+        return details;
+    } catch (error) {
+        console.error('イベント詳細取得エラー:', error);
+        return null;
+    }
+}
+
+// 天文イベント詳細モーダルを開く
+export function openEclipseDetailModal(eclipse, eventType) {
+    const lat = AppState.location.lat || 35.6762;
+    const lon = AppState.location.lon || 139.6503;
+
+    const details = getEclipseDetails(eclipse, eventType, lat, lon);
+    if (!details) {
+        alert('詳細情報を取得できませんでした');
+        return;
+    }
+
+    // モーダルに詳細情報を表示
+    const modalContent = document.getElementById('eclipse-detail-content');
+
+    let html = `
+        <div class="space-y-4">
+            <!-- イベントタイプ -->
+            <div class="text-center">
+                <h4 class="text-2xl font-bold text-yellow-300 mb-2">
+                    ${eventType.includes('月食') ? '🌕' : '🌑'} ${eventType}
+                </h4>
+                <div class="text-lg text-white">${details.peakTime}</div>
+            </div>
+    `;
+
+    // 観測可能性
+    if (details.observable === true) {
+        html += `
+            <div class="bg-green-900/30 border border-green-700 rounded-lg p-3">
+                <div class="flex items-center gap-2 text-green-300 mb-2">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    <span class="font-semibold">観測可能</span>
+                </div>
+                <div class="text-sm text-slate-300">${details.visibilityNote}</div>
+            </div>
+        `;
+    } else if (details.observable === false) {
+        html += `
+            <div class="bg-red-900/30 border border-red-700 rounded-lg p-3">
+                <div class="flex items-center gap-2 text-red-300 mb-2">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                    <span class="font-semibold">現在地からは観測不可</span>
+                </div>
+                <div class="text-sm text-slate-300">${details.visibilityNote}</div>
+            </div>
+        `;
+    } else {
+        html += `
+            <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-3">
+                <div class="flex items-center gap-2 text-blue-300 mb-2">
+                    <i data-lucide="info" class="w-5 h-5"></i>
+                    <span class="font-semibold">観測地域情報</span>
+                </div>
+                <div class="text-sm text-slate-300">${details.visibilityNote}</div>
+            </div>
+        `;
+    }
+
+    // 月食の詳細時刻
+    if (eventType.includes('月食')) {
+        html += `<div class="border-t border-slate-700 pt-3">
+            <div class="text-sm font-semibold text-slate-300 mb-3">📅 食の経過</div>
+            <div class="space-y-2">
+        `;
+
+        if (details.penumbralStart) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">半影食開始</span>
+                        <span class="text-white font-semibold">${details.penumbralStart}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.partialStart) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">部分食開始</span>
+                        <span class="text-white font-semibold">${details.partialStart}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.totalStart) {
+            html += `
+                <div class="bg-orange-900/30 border border-orange-700 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-orange-300 text-sm font-semibold">皆既食開始</span>
+                        <span class="text-white font-bold">${details.totalStart}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `
+            <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-yellow-300 text-sm font-semibold">食の最大</span>
+                    <span class="text-white font-bold">${moment(details.rawData.peak.date || details.rawData.peak).format('HH:mm')}</span>
+                </div>
+            </div>
+        `;
+
+        if (details.totalEnd) {
+            html += `
+                <div class="bg-orange-900/30 border border-orange-700 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-orange-300 text-sm font-semibold">皆既食終了</span>
+                        <span class="text-white font-bold">${details.totalEnd}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.partialEnd) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">部分食終了</span>
+                        <span class="text-white font-semibold">${details.partialEnd}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.penumbralEnd) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">半影食終了</span>
+                        <span class="text-white font-semibold">${details.penumbralEnd}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `</div></div>`;
+
+        // 継続時間の情報
+        html += `
+            <div class="border-t border-slate-700 pt-3">
+                <div class="text-sm font-semibold text-slate-300 mb-3">⏱️ 継続時間</div>
+                <div class="grid grid-cols-1 gap-2">
+        `;
+
+        if (details.totalDuration) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">皆既継続時間</span>
+                        <span class="text-orange-300 font-semibold">${details.totalDuration}分</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.partialDuration) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">部分食継続時間</span>
+                        <span class="text-white font-semibold">${details.partialDuration}分</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.penumbralDuration) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">半影食継続時間</span>
+                        <span class="text-slate-400 font-semibold">${details.penumbralDuration}分</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `</div></div>`;
+    }
+
+    // 日食の詳細時刻（観測可能な場合のみ）
+    if (eventType.includes('日食') && details.observable) {
+        html += `
+            <div class="border-t border-slate-700 pt-3">
+                <div class="text-sm font-semibold text-slate-300 mb-3">📅 現在地での食の経過</div>
+                <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-2 mb-2">
+                    <div class="text-center text-blue-300 text-sm">
+                        ${details.localType || eventType}
+                    </div>
+                </div>
+                <div class="space-y-2">
+        `;
+
+        if (details.partialStart) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">部分食開始</span>
+                        <span class="text-white font-semibold">${details.partialStart}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.totalStart) {
+            html += `
+                <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-yellow-300 text-sm font-semibold">${details.localType === '金環日食' ? '金環開始' : '皆既開始'}</span>
+                        <span class="text-white font-bold">${details.totalStart}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.localPeak) {
+            html += `
+                <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-yellow-300 text-sm font-semibold">食の最大</span>
+                        <span class="text-white font-bold">${details.localPeak}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.obscuration) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">食分（欠ける割合）</span>
+                        <span class="text-white font-semibold">${details.obscuration}%</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.totalEnd) {
+            html += `
+                <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-yellow-300 text-sm font-semibold">${details.localType === '金環日食' ? '金環終了' : '皆既終了'}</span>
+                        <span class="text-white font-bold">${details.totalEnd}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (details.partialEnd) {
+            html += `
+                <div class="bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm">部分食終了</span>
+                        <span class="text-white font-semibold">${details.partialEnd}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `</div></div>`;
+    }
+
+    // 観測アドバイス
+    html += `
+        <div class="border-t border-slate-700 pt-3">
+            <div class="text-sm font-semibold text-slate-300 mb-2">💡 観測アドバイス</div>
+            <div class="text-xs text-slate-400 leading-relaxed space-y-1">
+    `;
+
+    if (eventType.includes('月食')) {
+        html += `
+            <p>• 月食は肉眼で観測できます。双眼鏡や望遠鏡があるとより詳細に観察できます。</p>
+            <p>• 皆既月食では月が赤銅色に見えます（地球の大気による屈折光）。</p>
+            <p>• 撮影する場合：三脚使用、ISO400-800、F5.6-8、露出は月の明るさに応じて調整（1/250秒〜数秒）。</p>
+            <p>• 月が地平線上にある時間帯に観測してください。</p>
+        `;
+    } else if (eventType.includes('日食')) {
+        if (details.observable) {
+            html += `
+                <p class="text-red-300 font-semibold">⚠️ 日食の観測には必ず日食グラスを使用してください！</p>
+                <p>• 肉眼や通常のサングラス、カメラのファインダーで太陽を直視すると失明の危険があります。</p>
+                <p>• 日食グラスは天文ショップやオンラインで入手できます（ISO 12312-2準拠品）。</p>
+                <p>• 撮影する場合は必ず太陽撮影用NDフィルター（ND100000相当）を使用してください。</p>
+            `;
+
+            if (details.localType === '皆既日食' && details.totalStart && details.totalEnd) {
+                html += `
+                    <p class="text-yellow-300">• 皆既中（${details.totalStart}〜${details.totalEnd}）のみ、安全にフィルターなしで観測・撮影できます。</p>
+                `;
+            }
+        } else {
+            html += `
+                <p>• この日食は現在の位置からは観測できませんが、インターネット中継で視聴できる可能性があります。</p>
+                <p>• 観測可能な地域への遠征を計画される場合は、事前に現地の天候や観測条件を調べましょう。</p>
+            `;
+        }
+    }
+
+    html += `
+            </div>
+        </div>
+    </div>
+    `;
+
+    modalContent.innerHTML = html;
+
+    // Lucideアイコンを再描画
+    lucide.createIcons();
+
+    // モーダルを表示
+    document.getElementById('eclipse-detail-modal').classList.remove('hidden');
+}
+
+// 天文イベント詳細モーダルを閉じる
+export function closeEclipseDetailModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('eclipse-detail-modal').classList.add('hidden');
+}
+
 export function updateAstronomicalEvents(targetDate) {
     const container = document.getElementById('astronomical-events');
     const events = [];
@@ -1078,7 +1493,8 @@ export function updateAstronomicalEvents(targetDate) {
                     icon: '🌕',
                     color: 'orange',
                     duration: duration,
-                    note: '世界中の広い範囲で観測可能'
+                    note: '世界中の広い範囲で観測可能',
+                    rawData: eclipse
                 });
             });
         } catch (error) {
@@ -1147,7 +1563,8 @@ export function updateAstronomicalEvents(targetDate) {
                     timeText: timeText,
                     icon: '🌑',
                     color: 'yellow',
-                    note: '観測可能地域は限定的です'
+                    note: '観測可能地域は限定的です',
+                    rawData: eclipse
                 });
             });
         } catch (error) {
@@ -1171,11 +1588,16 @@ export function updateAstronomicalEvents(targetDate) {
                 yellow: { bg: 'bg-yellow-900/30', text: 'text-yellow-300' }
             };
 
-            container.innerHTML = futureEvents.map(event => {
+            container.innerHTML = futureEvents.map((event, index) => {
                 const style = colorStyles[event.color] || colorStyles.yellow;
 
+                // イベントデータをグローバルに保存（クリック時に使用）
+                if (!window.eclipseEvents) window.eclipseEvents = [];
+                window.eclipseEvents[index] = event.rawData;
+
                 return `
-                    <div class="${style.bg} rounded-lg p-2">
+                    <div class="${style.bg} rounded-lg p-2 cursor-pointer hover:bg-opacity-80 transition-all border border-transparent hover:border-${event.color}-500"
+                         onclick="openEclipseDetailModal(window.eclipseEvents[${index}], '${event.type}')">
                         <div class="flex items-center justify-between">
                             <span class="font-semibold ${style.text}">${event.icon} ${event.type}</span>
                             <span class="text-xs ${style.text}">${event.timeText}</span>
@@ -1184,9 +1606,16 @@ export function updateAstronomicalEvents(targetDate) {
                         ${event.duration ? `<div class="text-xs text-slate-300 mt-1">⏱️ ${event.duration}</div>` : ''}
                         ${event.note ? `<div class="text-xs text-slate-400 mt-1">📍 ${event.note}</div>` : ''}
                         ${event.daysUntil <= 30 ? '<div class="text-xs text-yellow-300 mt-1">⭐ 近日開催</div>' : ''}
+                        <div class="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                            <i data-lucide="info" class="w-3 h-3"></i>
+                            <span>クリックして詳細を表示</span>
+                        </div>
                     </div>
                 `;
             }).join('');
+
+            // Lucideアイコンを再描画
+            lucide.createIcons();
         }
     } catch (error) {
         console.error('天文イベント計算エラー:', error);

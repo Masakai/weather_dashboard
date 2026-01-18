@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-01-18
+
+### Added
+- `astronomy-service.js`: 天文イベント（月食・日食）の詳細情報表示機能を追加
+  - 各イベントをクリックすることで詳細モーダルを表示
+  - 月食の場合: 部分食開始、皆既開始、食の最大、皆既終了、部分食終了の時刻を表示
+  - 月食の場合: 皆既継続時間、部分食継続時間、半影食継続時間を表示
+  - 日食の場合: ユーザーの現在地での観測可能性を自動判定
+  - 日食の場合: 現在地での食の経過（開始、最大、終了時刻）と食分（欠ける割合）を表示
+  - 観測アドバイス（安全な観測方法、撮影設定など）を表示
+- `astronomy-service.js`: `getEclipseDetails()` 関数を追加し、Astronomy Engineを使用した高精度な詳細情報取得を実装
+- `astronomy-service.js`: `openEclipseDetailModal()` 関数と `closeEclipseDetailModal()` 関数を追加
+- `index.html`: 天文イベント詳細表示用のモーダルUIを追加
+
+### Changed
+- `astronomy-service.js`: `updateAstronomicalEvents()` 関数を修正し、各イベントアイテムにクリック可能なUIを追加
+- `astronomy-service.js`: イベントデータに `rawData` プロパティを追加し、詳細表示に必要な情報を保持
+- 天文イベントリストに「クリックして詳細を表示」の案内テキストを追加
+
+### Improved
+- ユーザーが天文イベントの詳細な時刻や観測可能性を簡単に確認できるようになりました
+- 日食の場合、現在地から観測できるかどうかを自動判定し、観測できない場合は警告を表示
+- 日食観測時の安全に関する重要な注意事項を目立つように表示
+
 ## [3.1.9] - 2026-01-18
 
 ### Improved
