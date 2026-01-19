@@ -472,9 +472,9 @@ escapeHtml関数にnull/undefinedガードを追加し、main.jsのキャッシ�
 5. **リモートにプッシュ**（`git push -u origin claude/feature-name-ABC123`）
 6. **PR を作成**:
    - `gh` CLI は使用できないため、GitHub Web UI を使用
-   - ブラウザで https://github.com/Masakai/weather_dashboard にアクセス
+   - ブラウザで https://github.com/m-sakaimono/weather_dashboard にアクセス
    - 「Compare & pull request」ボタンをクリック
-   - または直接 URL を開く: `https://github.com/Masakai/weather_dashboard/compare/main...ブランチ名`
+   - または直接 URL を開く: `https://github.com/m-sakaimono/weather_dashboard/compare/main...ブランチ名`
    - タイトルと説明を日本語で記述してPRを作成
 
 ---
@@ -864,7 +864,7 @@ updateISSInfo();
 
 ## 連絡先とサポート
 
-**プロジェクトリポジトリ**: [github.com/Masakai/weather_dashboard](https://github.com/Masakai/weather_dashboard)
+**プロジェクトリポジトリ**: [github.com/m-sakaimono/weather_dashboard](https://github.com/m-sakaimono/weather_dashboard)
 
 **開発元**: 株式会社リバーランズ・コンサルティング
 
