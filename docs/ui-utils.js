@@ -18,6 +18,25 @@ export function toggleAccordion(id) {
         icon.style.transform = 'rotate(0deg)';
     }
 }
+export function toggleMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const overlay = document.getElementById('mobile-menu-overlay');
+    if (menu && overlay) {
+        menu.classList.toggle('active');
+        overlay.classList.toggle('hidden');
+    }
+}
+export function scrollToSection(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        toggleMenu();
+        // 少し遅延させてメニューが閉じるアニメーションと重ならないようにするか、
+        // あるいは即座に実行する。
+        setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+}
 // XSS対策: HTMLエスケープ関数
 export function escapeHtml(text) {
     if (text === undefined || text === null) return '';
