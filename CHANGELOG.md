@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.6] - 2026-01-19
+
+### Changed
+- キャッシュバスティング（バージョンクエリ）の仕組みを調査し、全モジュールのインポートを一貫性のある最新状態に維持。
+- ドキュメント（CHANGELOG.md, README.md）のバージョンを 3.3.6 に更新。
+
+## [3.3.5] - 2026-01-19
+
+### Fixed
+- `iss-service.js`: 昼間（14:00頃など）にISSが肉眼観測可能と誤表示される問題を修正しました。
+  - `Astronomy.Horizon` に渡していた無効な引数 `'Refraction'` を修正。
+  - 暗さ判定においてエラーが発生した場合にデフォルトで `true`（可視）を返していたのを `false` に変更。
+  - `SearchRiseSet` を使用した「直前の日没」と「直後の日の出」の取得ロジックを改善し、ユーザーの要望（日没後2時間、日の出前2時間以内）を正確に判定するようにしました。
+
+## [3.3.4] - 2026-01-19
+
+### Improved
+- `iss-service.js`: ISSの肉眼観測可能判定を改善しました。
+  - 日没後2時間以内、または日の出前2時間以内のみを「肉眼可」と判定するように制限を追加しました。
+
+## [3.3.3] - 2026-01-19
+
+### Fixed
+- `iss-service.js`: `satellite.sunPos` が未定義のためにISS情報の計算が失敗する問題を修正しました。
+
 ## [3.3.2] - 2026-01-19
 
 ### Added

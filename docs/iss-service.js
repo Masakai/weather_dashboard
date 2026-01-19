@@ -1,4 +1,4 @@
-import { AppState } from './state.js?v=3.3.2';
+import { AppState } from './state.js?v=3.3.6';
 
 export function requestISSNotificationPermission() {
     if ('Notification' in window) {
@@ -41,8 +41,9 @@ export function showISSNotification(pass) {
     const startTime = moment(pass.startTime).format('HH:mm');
     const maxElevation = pass.maxElevation.toFixed(1);
     const duration = Math.round((pass.endTime - pass.startTime) / 1000 / 60);
+    const nakedEyeLabel = pass.isVisibleToNakedEye ? '【肉眼で観測可能】' : '【写真撮影向き】';
 
-    const message = `約1時間後（${startTime}頃）にISS通過があります！\n最大高度: ${maxElevation}° | 継続時間: ${duration}分`;
+    const message = `約1時間後（${startTime}頃）にISS通過があります！${nakedEyeLabel}\n最大高度: ${maxElevation}° | 継続時間: ${duration}分`;
 
     // ブラウザ通知を表示（許可されている場合）
     if (AppState.iss.notificationPermission === 'granted') {
@@ -241,34 +242,23 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
         // 視認可能範囲の判定（仰角0度以上 = 地平線上）
         const isInVisibleRange = elevation > 0;
 
-        // 日没後2H以内か日の出前2H以内
-        const sunTimes = calculateSunMoonTimes(date, observerLat, observerLon);
-        let isSunCondition = false;
-        if (sunTimes.sunsetDate && sunTimes.sunriseDate) {
-            const sunset = moment(sunTimes.sunsetDate);
-            const sunrise = moment(sunTimes.sunriseDate);
-            const nowMoment = moment(date);
-
-            const diffAfterSunset = nowMoment.diff(sunset, 'hours', true);
-            const diffBeforeSunrise = sunrise.diff(nowMoment, 'hours', true);
-
-            if ((diffAfterSunset >= 0 && diffAfterSunset <= 2) || (diffBeforeSunrise >= 0 && diffBeforeSunrise <= 2)) {
-                isSunCondition = true;
-            }
-        }
+        // 肉眼での視認性判定（太陽光が当たっている かつ 観測地が暗い）
+        const isIlluminated = isISSIlluminated(date, satrec);
+        const isDark = isLocationDark(date, observerLat, observerLon);
+        const isVisibleToNakedEye = isIlluminated && isDark;
 
         // 観測に最適な条件（距離1300km以内 + 仰角20度以上）
-        const isOptimalCondition = groundDistance <= 1300 && isSunCondition && elevation >= 20;
+        const isOptimalCondition = groundDistance <= 1300 && isVisibleToNakedEye && elevation >= 20;
 
         // 表示の優先順位：最適条件 > 視認可能範囲内 > 範囲外
         if (isOptimalCondition) {
             predictionPanel.classList.remove('hidden');
             predictionContent.innerHTML = `
-                <div class="font-bold text-yellow-300 text-lg">✨ 現在、ISSが観測に最適な条件です！</div>
+                <div class="font-bold text-yellow-300 text-lg">✨ 現在、ISSが肉眼で観測可能です！</div>
                 <div class="mt-1 text-base">
                     距離: ${groundDistance.toFixed(0)} km (1300km以内)<br>
                     仰角: ${elevation.toFixed(1)}° (20°以上)<br>
-                    時間: 日出前/日没後の好条件
+                    状態: 太陽光反射中 & 夜間
                 </div>
             `;
         } else if (isInVisibleRange) {
@@ -280,7 +270,8 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
                     仰角: ${elevation.toFixed(1)}° (地平線上)<br>
                     方位: ${azimuth.toFixed(1)}°
                 </div>
-                ${!isSunCondition ? '<div class="mt-1 text-sm text-slate-400">※日中のため肉眼では見えにくい可能性があります</div>' : ''}
+                ${!isIlluminated ? '<div class="mt-1 text-sm text-slate-400">※地球の影に入っている（食）ため見えません</div>' : 
+                  !isDark ? '<div class="mt-1 text-sm text-slate-400">※空が明るいため肉眼では見えません</div>' : ''}
                 ${elevation < 20 ? '<div class="mt-1 text-sm text-slate-400">※仰角が低いため観測が困難な場合があります</div>' : ''}
             `;
         } else {
@@ -306,8 +297,11 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
                     <div class="mt-1 text-2xl font-mono text-white">
                         ${timeStr}
                     </div>
-                    <div class="text-sm text-slate-500 mt-1">
-                        開始時刻: ${moment(nextPass.startTime).format('M/D HH:mm:ss')} (最大高度 ${nextPass.maxElevation.toFixed(0)}°)
+                    <div class="text-sm mt-1 flex items-center gap-2">
+                        <span class="text-slate-500">開始: ${moment(nextPass.startTime).format('M/D HH:mm:ss')}</span>
+                        ${nextPass.isVisibleToNakedEye 
+                            ? '<span class="text-yellow-300 text-[10px] bg-yellow-500/20 px-1 rounded border border-yellow-500/30">肉眼可</span>' 
+                            : '<span class="text-slate-400 text-[10px] bg-slate-500/10 px-1 rounded border border-slate-500/20">撮影向</span>'}
                     </div>
                 `;
                 if (typeof lucide !== 'undefined') {
@@ -483,6 +477,12 @@ export async function calculateISSPasses() {
 
                         // 最大高度が10度以上のパスのみ記録
                         if (maxElevation >= 10) {
+                            // 肉眼での視認性を判定（パスの中間点あたりで判定するか、開始・最大・終了のいずれかで判定）
+                            const isVisible = (isISSIlluminated(currentPass.startTime, satrec) && isLocationDark(currentPass.startTime, AppState.location.lat, AppState.location.lon)) ||
+                                              (isISSIlluminated(maxElevationTime, satrec) && isLocationDark(maxElevationTime, AppState.location.lat, AppState.location.lon)) ||
+                                              (isISSIlluminated(new Date(time - interval), satrec) && isLocationDark(new Date(time - interval), AppState.location.lat, AppState.location.lon));
+                            
+                            currentPass.isVisibleToNakedEye = isVisible;
                             passes.push(currentPass);
                         }
 
@@ -508,6 +508,11 @@ export async function calculateISSPasses() {
             currentPass.maxDistance = maxDistance;
 
             if (maxElevation >= 10) {
+                const isVisible = (isISSIlluminated(currentPass.startTime, satrec) && isLocationDark(currentPass.startTime, AppState.location.lat, AppState.location.lon)) ||
+                                  (isISSIlluminated(maxElevationTime, satrec) && isLocationDark(maxElevationTime, AppState.location.lat, AppState.location.lon)) ||
+                                  (isISSIlluminated(endTime, satrec) && isLocationDark(endTime, AppState.location.lat, AppState.location.lon));
+                
+                currentPass.isVisibleToNakedEye = isVisible;
                 passes.push(currentPass);
             }
         }
@@ -541,10 +546,17 @@ export async function calculateISSPasses() {
                     qualityColor = 'text-slate-400';
                 }
 
+                const nakedEyeIcon = pass.isVisibleToNakedEye 
+                    ? '<span class="flex items-center gap-0.5 text-yellow-300 text-[10px] bg-yellow-500/20 px-1 rounded border border-yellow-500/30">肉眼可</span>' 
+                    : '<span class="flex items-center gap-0.5 text-slate-400 text-[10px] bg-slate-500/10 px-1 rounded border border-slate-500/20">撮影向</span>';
+
                 return `
                     <div class="bg-slate-700/30 rounded-lg p-2 hover:bg-slate-700/50 transition cursor-pointer" onclick="showPassOnSkymap(${index})">
                         <div class="flex items-center justify-between mb-1">
-                            <div class="font-semibold text-white text-sm">${startStr}</div>
+                            <div class="flex items-center gap-2">
+                                <div class="font-semibold text-white text-sm">${startStr}</div>
+                                ${nakedEyeIcon}
+                            </div>
                             <div class="${qualityColor} text-sm font-bold">${quality}</div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-1 text-sm">
@@ -591,6 +603,100 @@ export function showPassOnSkymap(passIndex) {
 
     openISSSkymapModal();
 }
+
+/**
+ * ISSが太陽光に照らされているか（食の状態でないか）を判定
+ * @param {Date} date 判定時刻
+ * @param {Object} satrec satellite.jsのsatrecオブジェクト
+ * @returns {boolean} 照らされている場合はtrue
+ */
+export function isISSIlluminated(date, satrec) {
+    const positionAndVelocity = satellite.propagate(satrec, date);
+    const positionEci = positionAndVelocity.position;
+    
+    // Astronomy.jsを使用して太陽の位置(ECI座標)を取得
+    // satellite.js v5.0.0でsunPosが動作しない問題の対策
+    const sunVectorAU = Astronomy.GeoVector(Astronomy.Body.Sun, date, true);
+    const AU_TO_KM = 149597870.7;
+    const sunPosEci = {
+        x: sunVectorAU.x * AU_TO_KM,
+        y: sunVectorAU.y * AU_TO_KM,
+        z: sunVectorAU.z * AU_TO_KM
+    };
+
+    // satellite.js v5.0.0+ では eclipse 判定用の関数がある
+    // または自前で計算する必要がある。
+    // satellite.js のドキュメントによると、直接的な eclipse 関数はない場合が多い
+    // 代わりに位置ベクトルから判定する
+
+    // 簡易的な食判定ロジック
+    // 地球の半径 (km)
+    const earthRadius = 6371.0;
+
+    // 太陽と衛星のベクトル
+    // 衛星の位置ベクトル (positionEci) と太陽の位置ベクトル (sunPosEci)
+    // 地球を中心とした時の判定
+
+    const satVec = positionEci;
+    const sunVec = sunPosEci;
+
+    // 太陽と衛星のなす角
+    const cosTheta = (satVec.x * sunVec.x + satVec.y * sunVec.y + satVec.z * sunVec.z) /
+                     (Math.sqrt(satVec.x**2 + satVec.y**2 + satVec.z**2) * Math.sqrt(sunVec.x**2 + sunVec.y**2 + sunVec.z**2));
+
+    // 衛星が地球の影（円錐状）に入っているか
+    // 影の判定：太陽-地球-衛星の角度が鈍角で、かつ地球の影の筒の中にある
+    if (cosTheta > 0) return true; // 太陽側にいる
+
+    // 太陽の反対側にいる場合、地球の影に入っている可能性がある
+    // 地球の中心から衛星-太陽を結ぶ線分への距離を計算
+    const sinTheta = Math.sqrt(1 - cosTheta * cosTheta);
+    const distFromCenter = Math.sqrt(satVec.x**2 + satVec.y**2 + satVec.z**2) * sinTheta;
+
+    return distFromCenter > earthRadius;
+}
+
+/**
+ * 観測地が十分に暗いか（肉眼でISSが見える明るさか）を判定
+ * @param {Date} date 判定時刻
+ * @param {number} lat 緯度
+ * @param {number} lon 経度
+ * @returns {boolean} 暗い場合はtrue
+ */
+export function isLocationDark(date, lat, lon) {
+    try {
+        const observer = new Astronomy.Observer(lat, lon, 0);
+        const aTime = new Astronomy.Time(date);
+        const equat = Astronomy.Equator(Astronomy.Body.Sun, aTime, observer, 1, 1);
+        const horiz = Astronomy.Horizon(aTime, observer, equat.ra, equat.dec, 'normal');
+        
+        // 1. 空の明るさチェック
+        // 太陽の仰角が-6度（常用薄明）以下であれば、空が十分に暗くISSが見え始める
+        if (horiz.altitude > -6) return false;
+
+        // 2. 時間帯チェック（日没後2時間、または日の出前2時間）
+        // ユーザー要望：日没2時間後まで、および日の出2時間前までを肉眼観測可能と判断する
+        // 直近の日没と次の日の出を探すために検索範囲を調整
+        const searchStartSunset = new Date(date.getTime() - 24 * 60 * 60 * 1000); // 24時間前から検索
+        const sunset = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, -1, searchStartSunset, 2); 
+        
+        const searchStartSunrise = new Date(date.getTime() - 2 * 60 * 60 * 1000); // 2時間前から検索
+        const sunrise = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, 1, searchStartSunrise, 2);
+
+        if (!sunset || !sunrise) return true;
+
+        const diffSunset = (date.getTime() - sunset.date.getTime()) / (1000 * 60 * 60);
+        const diffSunrise = (sunrise.date.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+        // 日没後2時間以内、または日の出前2時間以内であれば肉眼可
+        // 深夜（日没から2時間以上経過し、かつ日の出まで2時間以上ある時間帯）は除外
+        return (diffSunset >= 0 && diffSunset <= 2) || (diffSunrise >= 0 && diffSunrise <= 2);
+    } catch (e) {
+        console.warn('暗さ判定に失敗しました。', e);
+        return false; 
+    }
+}
+
 export function openISSSkymapModal(forcedDate = null) {
     const modal = document.getElementById('iss-skymap-modal');
     modal.classList.remove('hidden');

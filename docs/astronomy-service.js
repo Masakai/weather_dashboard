@@ -1,5 +1,5 @@
-import { AppState } from './state.js?v=3.3.2';
-import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.3.2';
+import { AppState } from './state.js?v=3.3.6';
+import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.3.6';
 export function calculateSunMoonTimes(date, lat, lon) {
     try {
         const observer = new Astronomy.Observer(lat, lon, 0);
