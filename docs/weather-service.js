@@ -1,5 +1,5 @@
-import { AppState } from './state.js?v=3.2.3';
-import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.2.3';
+import { AppState } from './state.js?v=3.3.0';
+import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.3.0';
 
 export function calculateStarryScore(cloudCover, moonAge, humidity, visibility = 24, windSpeed = 5) {
     // 雲量スコア (0-100) - 雲が少ないほど高い
@@ -250,12 +250,12 @@ export function renderDashboard(targetMoment) {
             summaryDisplay.innerHTML = `
                 <div class="flex items-center gap-2">
                     <span class="text-slate-400">今日:</span>
-                    <i data-lucide="${todayWeather.icon}" class="w-4 h-4 ${todayWeather.color}"></i>
-                    <span>${todayWeather.label}</span>
+                    <i data-lucide="${todayWeather.icon}" class="w-5 h-5 ${todayWeather.color}"></i>
+                    <span class="text-base font-semibold">${todayWeather.label}</span>
                 </div>
-                <div class="flex items-center gap-3 ml-2">
-                    <span class="text-orange-400 font-medium">最高 ${todayMax}°C</span>
-                    <span class="text-blue-400 font-medium">最低 ${todayMin}°C</span>
+                <div class="flex items-center gap-4 ml-2 text-base">
+                    <span class="text-orange-400 font-bold">最高 ${todayMax}°C</span>
+                    <span class="text-blue-400 font-bold">最低 ${todayMin}°C</span>
                 </div>
             `;
             if (window.lucide) {
@@ -437,29 +437,29 @@ export function renderDashboard(targetMoment) {
 
     if (astroCount > 0) {
         const avgAstroCloud = astroCloudSum / astroCount;
-        summary += "<br><br><strong>🔭 天体観測予報:</strong> ";
+        summary += "<br><br><strong class='text-lg'>🔭 天体観測予報:</strong> ";
         const dateStr = astroStart.format('M/D');
-        const observationPeriod = `<span class='text-xs text-slate-500'>(${astroStart.format('HH:mm')}～${astroEnd.format('HH:mm')})</span>`;
+        const observationPeriod = `<span class='text-sm text-slate-500'>(${astroStart.format('HH:mm')}～${astroEnd.format('HH:mm')})</span>`;
 
         // 月の影響を加味したコメント
         let moonComment = "";
         if (moonData.age > 10 && moonData.age < 18) {
-            moonComment = " <span class='text-yellow-400'>※月明かりの影響大</span>";
+            moonComment = " <span class='text-yellow-400 font-bold'>※月明かりの影響大</span>";
         }
 
         // より厳しい閾値での全体評価
         if (avgAstroCloud < 10) {
-            summary += `${dateStr}の夜${observationPeriod}は、雲が少なく<strong class='text-green-400'>絶好の天体観測日和</strong>です。${moonComment}`;
+            summary += `<span class='text-base'>${dateStr}の夜${observationPeriod}は、雲が少なく<strong class='text-green-400'>絶好の天体観測日和</strong>です。${moonComment}</span>`;
         } else if (avgAstroCloud < 25) {
-            summary += `${dateStr}の夜${observationPeriod}は、<strong class='text-blue-400'>観測に適しています</strong>。${moonComment}`;
+            summary += `<span class='text-base'>${dateStr}の夜${observationPeriod}は、<strong class='text-blue-400'>観測に適しています</strong>。${moonComment}</span>`;
         } else if (avgAstroCloud < 50) {
-            summary += `${dateStr}の夜${observationPeriod}は、<strong class='text-orange-400'>やや雲が多め</strong>です。雲の切れ間を狙いましょう。`;
+            summary += `<span class='text-base'>${dateStr}の夜${observationPeriod}は、<strong class='text-orange-400'>やや雲が多め</strong>です。雲の切れ間を狙いましょう。</span>`;
         } else {
-            summary += `${dateStr}の夜${observationPeriod}は、雲が多く<strong class='text-red-400'>観測には不向き</strong>な予報です。`;
+            summary += `<span class='text-base'>${dateStr}の夜${observationPeriod}は、雲が多く<strong class='text-red-400'>観測には不向き</strong>な予報です。</span>`;
         }
 
         // 時間帯別の詳細評価
-        summary += "<div class='flex flex-wrap gap-2 mt-3'>";
+        summary += "<div class='flex flex-wrap gap-2 mt-4'>";
         timeSlots.forEach(slot => {
             if (slot.count > 0) {
                 const avg = slot.sum / slot.count;
@@ -484,10 +484,10 @@ export function renderDashboard(targetMoment) {
                     bg = 'bg-red-500/10';
                 }
                 summary += `
-                    <div class='flex flex-col items-center justify-center px-3 py-2 rounded-xl border border-white/5 ${bg} min-w-[80px]'>
-                        <span class='text-xs text-slate-400 mb-1'>${slot.label}</span>
-                        <span class='text-lg mb-1'>${icon}</span>
-                        <span class='text-xs font-bold ${color}'>${Math.round(avg)}%</span>
+                    <div class='flex flex-col items-center justify-center px-4 py-3 rounded-xl border border-white/5 ${bg} min-w-[100px]'>
+                        <span class='text-sm text-slate-400 mb-1'>${slot.label}</span>
+                        <span class='text-xl mb-1'>${icon}</span>
+                        <span class='text-base font-bold ${color}'>${Math.round(avg)}%</span>
                     </div>`;
             }
         });
@@ -683,39 +683,39 @@ export function renderDashboard(targetMoment) {
 
         row.innerHTML = `
             <td class="py-4 px-2">
-                <div class="font-bold ${isSelectedDay ? 'text-blue-300' : 'text-white'}">${date.format('M/D')}</div>
-                <div class="text-xs text-slate-400">${date.format('ddd')}</div>
+                <div class="font-bold text-lg ${isSelectedDay ? 'text-blue-300' : 'text-white'}">${date.format('M/D')}</div>
+                <div class="text-sm text-slate-400">${date.format('ddd')}</div>
             </td>
             <td class="py-4 px-2">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="${weatherInfo.icon}" class="${weatherInfo.color} w-6 h-6"></i>
-                    <span class="hidden md:inline text-sm">${weatherInfo.label}</span>
+                    <i data-lucide="${weatherInfo.icon}" class="${weatherInfo.color} w-7 h-7"></i>
+                    <span class="hidden md:inline text-base font-medium">${weatherInfo.label}</span>
                 </div>
             </td>
             <td class="py-4 px-2 text-center">
-                <div class="text-sm">${rainProb !== null ? rainProb + '%' : '-'}</div>
-                <div class="text-xs text-blue-300">${rainSum > 0 ? rainSum + 'mm' : ''}</div>
+                <div class="text-base">${rainProb !== null ? rainProb + '%' : '-'}</div>
+                <div class="text-sm text-blue-300">${rainSum > 0 ? rainSum + 'mm' : ''}</div>
             </td>
              <td class="py-4 px-2 text-center">
-                <div class="text-sm font-semibold">${avgCloud !== '-' ? avgCloud + '%' : '-'}</div>
-                <div class="w-16 bg-slate-700/50 rounded-full h-1 mx-auto mt-1">
-                    <div class="bg-slate-400 h-1 rounded-full" style="width: ${avgCloud !== '-' ? avgCloud : 0}%"></div>
+                <div class="text-base font-semibold">${avgCloud !== '-' ? avgCloud + '%' : '-'}</div>
+                <div class="w-16 bg-slate-700/50 rounded-full h-1.5 mx-auto mt-1">
+                    <div class="bg-slate-400 h-1.5 rounded-full" style="width: ${avgCloud !== '-' ? avgCloud : 0}%"></div>
                 </div>
             </td>
             <td class="py-4 px-2 text-center">
-                <div class="text-sm font-semibold text-blue-200 flex items-center justify-center gap-1">
-                    <i data-lucide="droplet" class="w-3 h-3"></i>
+                <div class="text-base font-semibold text-blue-200 flex items-center justify-center gap-1">
+                    <i data-lucide="droplet" class="w-4 h-4"></i>
                     ${avgHum !== '-' ? avgHum + '%' : '-'}
                 </div>
             </td>
              <td class="py-4 px-2 text-center">
-                <div class="text-lg" title="${moonInfo.phaseName} (月齢${moonInfo.age})">${moonInfo.icon}</div>
-                <div class="text-xs text-slate-400">${moonInfo.age}</div>
+                <div class="text-2xl" title="${moonInfo.phaseName} (月齢${moonInfo.age})">${moonInfo.icon}</div>
+                <div class="text-sm text-slate-400">${moonInfo.age}</div>
             </td>
             <td class="py-4 px-2 text-right">
-                <span class="font-bold text-orange-400">${maxTemp}°</span> 
+                <span class="font-bold text-orange-400 text-base">${maxTemp}°</span> 
                 <span class="text-slate-500 mx-1">/</span> 
-                <span class="text-blue-300">${minTemp}°</span>
+                <span class="text-blue-300 text-base">${minTemp}°</span>
             </td>
         `;
         weeklyBody.appendChild(row);

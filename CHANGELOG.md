@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-01-19
+
+### Improved
+- 高解像度・大画面デバイス（iPhone Pro Max等）での視認性向上のため、UI全体のフォントサイズと要素サイズを拡大
+  - 静的HTML要素 (`index.html`): ヘッダー、コントロールバー、気象詳細パネル、観測計画セクション等のフォントサイズを一段階から二段階拡大
+  - アイコンサイズ: Lucideアイコンのサイズをテキストに合わせて拡大
+  - 動的生成要素: 天体観測予報サマリー、週間予報テーブル、ISS情報、惑星情報、露出計算機の結果、天文イベント等のテキストサイズとパディングを調整
+  - レイアウトの微調整: テキスト拡大に伴うマージン・パディングの調整と、重要情報の太字化によるコントラスト向上
+
 ## [3.2.3] - 2026-01-18
 
 ### Added

@@ -1,4 +1,4 @@
-import { AppState } from './state.js?v=3.2.3';
+import { AppState } from './state.js?v=3.3.0';
 
 export function requestISSNotificationPermission() {
     if ('Notification' in window) {
@@ -264,8 +264,8 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
         if (isOptimalCondition) {
             predictionPanel.classList.remove('hidden');
             predictionContent.innerHTML = `
-                <div class="font-bold text-yellow-300">✨ 現在、ISSが観測に最適な条件です！</div>
-                <div class="mt-1 text-sm">
+                <div class="font-bold text-yellow-300 text-lg">✨ 現在、ISSが観測に最適な条件です！</div>
+                <div class="mt-1 text-base">
                     距離: ${groundDistance.toFixed(0)} km (1300km以内)<br>
                     仰角: ${elevation.toFixed(1)}° (20°以上)<br>
                     時間: 日出前/日没後の好条件
@@ -274,14 +274,14 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
         } else if (isInVisibleRange) {
             predictionPanel.classList.remove('hidden');
             predictionContent.innerHTML = `
-                <div class="font-bold text-blue-300">👁️ ISSは視認可能範囲内にあります</div>
-                <div class="mt-1 text-sm text-slate-300">
+                <div class="font-bold text-blue-300 text-lg">👁️ ISSは視認可能範囲内にあります</div>
+                <div class="mt-1 text-base text-slate-300">
                     地上距離: ${groundDistance.toFixed(0)} km<br>
                     仰角: ${elevation.toFixed(1)}° (地平線上)<br>
                     方位: ${azimuth.toFixed(1)}°
                 </div>
-                ${!isSunCondition ? '<div class="mt-1 text-xs text-slate-400">※日中のため肉眼では見えにくい可能性があります</div>' : ''}
-                ${elevation < 20 ? '<div class="mt-1 text-xs text-slate-400">※仰角が低いため観測が困難な場合があります</div>' : ''}
+                ${!isSunCondition ? '<div class="mt-1 text-sm text-slate-400">※日中のため肉眼では見えにくい可能性があります</div>' : ''}
+                ${elevation < 20 ? '<div class="mt-1 text-sm text-slate-400">※仰角が低いため観測が困難な場合があります</div>' : ''}
             `;
         } else {
             // 次回のパスを探す
@@ -299,14 +299,14 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
                 timeStr += `${seconds}秒`;
 
                 predictionContent.innerHTML = `
-                    <div class="font-bold text-slate-400 flex items-center gap-1">
+                    <div class="font-bold text-slate-400 flex items-center gap-1 text-sm">
                         <i data-lucide="clock" class="w-3 h-3"></i>
                         次回可視範囲に入るまで
                     </div>
-                    <div class="mt-1 text-lg font-mono text-white">
+                    <div class="mt-1 text-2xl font-mono text-white">
                         ${timeStr}
                     </div>
-                    <div class="text-xs text-slate-500 mt-1">
+                    <div class="text-sm text-slate-500 mt-1">
                         開始時刻: ${moment(nextPass.startTime).format('M/D HH:mm:ss')} (最大高度 ${nextPass.maxElevation.toFixed(0)}°)
                     </div>
                 `;
@@ -321,23 +321,23 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
         container.innerHTML = `
             <div class="bg-slate-700/30 rounded-lg p-3 space-y-2">
                 <div class="flex justify-between items-center">
-                    <span class="text-blue-300 font-bold">現在位置</span>
-                    <span class="text-xs px-2 py-0.5 rounded ${isVisible ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}">
+                    <span class="text-blue-300 font-bold text-base">現在位置</span>
+                    <span class="text-sm px-2 py-0.5 rounded ${isVisible ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}">
                         ${isVisible ? '地平線上' : '地平線下'}
                     </span>
                 </div>
-                <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="grid grid-cols-2 gap-2 text-sm">
                     <div>緯度: <span class="text-white font-mono">${latitude.toFixed(2)}°</span></div>
                     <div>経度: <span class="text-white font-mono">${longitude.toFixed(2)}°</span></div>
                     <div>高度: <span class="text-white font-mono">${height.toFixed(1)} km</span></div>
                     <div>距離: <span class="text-white font-mono">${range.toFixed(0)} km</span></div>
                 </div>
                 <div class="pt-2 border-t border-slate-600">
-                    <div class="flex justify-between text-xs">
+                    <div class="flex justify-between text-sm">
                         <span>方位角: <span class="text-white font-mono">${azimuth.toFixed(1)}°</span></span>
                         <span>仰角: <span class="text-white font-mono">${elevation.toFixed(1)}°</span></span>
                     </div>
-                    <div class="text-xs text-slate-400 mt-1">
+                    <div class="text-sm text-slate-400 mt-1">
                         地上距離: <span class="text-white font-mono">${groundDistance.toFixed(0)} km</span>
                     </div>
                 </div>
@@ -345,7 +345,7 @@ export async function calculateAndDisplayISS(date, observerLat, observerLon) {
                     <span>TLE Source: CelesTrak</span>
                     <span>Real-time Update</span>
                 </div>
-                <button onclick="openISSSkymapModal(new Date())" class="w-full mt-2 bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 py-2 px-3 rounded-lg text-xs font-semibold border border-blue-500/30 transition flex items-center justify-center gap-1">
+                <button onclick="openISSSkymapModal(new Date())" class="w-full mt-2 bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 py-2 px-3 rounded-lg text-sm font-semibold border border-blue-500/30 transition flex items-center justify-center gap-1">
                     <i data-lucide="compass" class="w-3 h-3"></i>
                     リアルタイム星座図を表示
                 </button>
@@ -544,10 +544,10 @@ export async function calculateISSPasses() {
                 return `
                     <div class="bg-slate-700/30 rounded-lg p-2 hover:bg-slate-700/50 transition cursor-pointer" onclick="showPassOnSkymap(${index})">
                         <div class="flex items-center justify-between mb-1">
-                            <div class="font-semibold text-white text-xs">${startStr}</div>
-                            <div class="${qualityColor} text-xs font-bold">${quality}</div>
+                            <div class="font-semibold text-white text-sm">${startStr}</div>
+                            <div class="${qualityColor} text-sm font-bold">${quality}</div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-1 text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-1 text-sm">
                             <div>
                                 <span class="text-slate-400">最大高度:</span>
                                 <span class="text-white font-semibold">${pass.maxElevation.toFixed(1)}°</span>
@@ -561,7 +561,7 @@ export async function calculateISSPasses() {
                                 <span class="text-white">${(pass.maxDistance).toFixed(0)}km</span>
                             </div>
                         </div>
-                        <div class="text-xs text-slate-500 mt-1">
+                        <div class="text-sm text-slate-500 mt-1">
                             継続時間: ${duration.toFixed(0)}分 | クリックで軌道表示
                         </div>
                     </div>
@@ -1083,14 +1083,14 @@ export function drawISSSkymapCanvas(forcedDate = null) {
             const pass = window.selectedPass;
             const duration = (pass.endTime - pass.startTime) / 1000 / 60;
             infoDiv.innerHTML = `
-                <div class="bg-blue-900/30 rounded p-2">
-                    <div class="text-blue-300 font-semibold text-sm mb-2 flex items-center justify-between">
+                <div class="bg-blue-900/30 rounded p-3">
+                    <div class="text-blue-300 font-semibold text-base mb-2 flex items-center justify-between">
                         <span>📡 選択されたパス</span>
-                        <button onclick="returnToCurrentPosition();" class="text-xs text-slate-400 hover:text-white">
+                        <button onclick="returnToCurrentPosition();" class="text-sm text-slate-400 hover:text-white">
                             現在位置に戻る
                         </button>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="grid grid-cols-2 gap-2 text-sm">
                         <div>
                             <div class="text-slate-400">開始時刻</div>
                             <div class="text-white font-mono">${moment(pass.startTime).format('M/D HH:mm')}</div>
@@ -1121,33 +1121,33 @@ export function drawISSSkymapCanvas(forcedDate = null) {
         } else if (issVisible) {
             const direction = getDirection(issAzimuth);
             infoDiv.innerHTML = `
-                <div class="grid grid-cols-3 gap-4 text-xs">
+                <div class="grid grid-cols-3 gap-4 text-sm">
                     <div>
                         <div class="text-slate-400">方位角</div>
-                        <div class="text-white font-mono text-sm">${issAzimuth.toFixed(1)}° (${direction})</div>
+                        <div class="text-white font-mono text-base">${issAzimuth.toFixed(1)}° (${direction})</div>
                     </div>
                     <div>
                         <div class="text-slate-400">高度</div>
-                        <div class="text-white font-mono text-sm">${issAltitude.toFixed(1)}°</div>
+                        <div class="text-white font-mono text-base">${issAltitude.toFixed(1)}°</div>
                     </div>
                     <div>
                         <div class="text-slate-400">状態</div>
-                        <div class="text-green-300 text-sm font-semibold">視野内 ✓</div>
+                        <div class="text-green-300 text-base font-semibold">視野内 ✓</div>
                     </div>
                 </div>
-                <div class="mt-2 text-xs text-slate-400">
+                <div class="mt-2 text-sm text-slate-400">
                     📍 観測地点: ${AppState.location.lat.toFixed(2)}°, ${AppState.location.lon.toFixed(2)}° | 計算時刻: ${moment(targetDate).format('HH:mm:ss')}
                 </div>
             `;
         } else {
             infoDiv.innerHTML = `
-                <div class="text-center text-slate-400">
-                    <div class="text-lg mb-2">🌅</div>
-                    <div class="font-semibold">ISSは現在視野内にありません</div>
-                    <div class="text-xs mt-2">
+                <div class="text-center text-slate-400 p-2">
+                    <div class="text-2xl mb-2">🌅</div>
+                    <div class="font-semibold text-base">ISSは現在視野内にありません</div>
+                    <div class="text-sm mt-2">
                         高度: ${issAltitude.toFixed(1)}° (地平線下)
                     </div>
-                    <div class="text-xs mt-1">
+                    <div class="text-sm mt-1">
                         📍 観測地点: ${AppState.location.lat.toFixed(2)}°, ${AppState.location.lon.toFixed(2)}° | 計算時刻: ${moment(targetDate).format('HH:mm:ss')}
                     </div>
                 </div>

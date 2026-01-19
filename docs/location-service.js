@@ -1,5 +1,5 @@
-import { AppState } from './state.js?v=3.2.3';
-import { escapeHtml } from './ui-utils.js?v=3.2.3';
+import { AppState } from './state.js?v=3.3.0';
+import { escapeHtml } from './ui-utils.js?v=3.3.0';
 
 export function addFavoriteLocation() {
     const name = prompt('この地点の名前を入力してください:', document.getElementById('location-name').innerText || '未設定');
@@ -20,25 +20,25 @@ export function renderFavoriteLocations(locations = AppState.location.favoriteLo
     const container = document.getElementById('favorite-locations');
     if (locations.length === 0) {
         container.innerHTML = `
-            <button onclick="addFavoriteLocation()" class="w-full bg-slate-800/50 hover:bg-slate-700/50 rounded-lg p-3 text-sm border border-slate-700 flex items-center justify-center gap-2">
+            <button onclick="addFavoriteLocation()" class="w-full bg-slate-800/50 hover:bg-slate-700/50 rounded-lg p-3 text-base border border-slate-700 flex items-center justify-center gap-2">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 現在地をお気に入りに追加
             </button>
         `;
     } else {
         container.innerHTML = locations.map((loc, index) => `
-            <div class="bg-slate-800/50 rounded-lg p-2 flex items-center justify-between border border-slate-700">
-                <button onclick="loadFavoriteLocation(${index})" class="flex-1 text-left text-sm hover:text-blue-300">
-                    <i data-lucide="map-pin" class="w-3 h-3 inline mr-1"></i>
+            <div class="bg-slate-800/50 rounded-lg p-3 flex items-center justify-between border border-slate-700 mb-2">
+                <button onclick="loadFavoriteLocation(${index})" class="flex-1 text-left text-base hover:text-blue-300 font-medium">
+                    <i data-lucide="map-pin" class="w-4 h-4 inline mr-2 text-blue-400"></i>
                     ${escapeHtml(loc.name)}
                 </button>
-                <button onclick="removeFavoriteLocation(${index})" class="text-red-400 hover:text-red-300 text-xs">
-                    <i data-lucide="x" class="w-3 h-3"></i>
+                <button onclick="removeFavoriteLocation(${index})" class="text-red-400 hover:text-red-300 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
         `).join('') + `
-            <button onclick="addFavoriteLocation()" class="w-full bg-slate-800/50 hover:bg-slate-700/50 rounded-lg p-2 text-xs border border-slate-700 flex items-center justify-center gap-2">
-                <i data-lucide="plus" class="w-3 h-3"></i>
+            <button onclick="addFavoriteLocation()" class="w-full bg-slate-800/50 hover:bg-slate-700/50 rounded-lg p-3 text-sm border border-slate-700 flex items-center justify-center gap-2 mt-2 font-bold">
+                <i data-lucide="plus" class="w-4 h-4"></i>
                 追加
             </button>
         `;

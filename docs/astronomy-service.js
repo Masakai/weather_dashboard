@@ -1,5 +1,5 @@
-import { AppState } from './state.js?v=3.2.3';
-import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.2.3';
+import { AppState } from './state.js?v=3.3.0';
+import { METEOR_SHOWERS, SEASONAL_OBJECTS } from './constants.js?v=3.3.0';
 export function calculateSunMoonTimes(date, lat, lon) {
     try {
         const observer = new Astronomy.Observer(lat, lon, 0);
@@ -280,15 +280,15 @@ export function calculateVisiblePlanets(observerDate, observerLat, observerLon) 
         // HTMLに表示
         const container = document.getElementById('visible-planets');
         if (visiblePlanets.length === 0) {
-            container.innerHTML = '<div class="text-slate-400">現在、地平線上に惑星はありません</div>';
+            container.innerHTML = '<div class="text-slate-400 text-base">現在、地平線上に惑星はありません</div>';
         } else {
             container.innerHTML = visiblePlanets.map(p => `
-                <div class="flex items-center justify-between bg-slate-700/30 rounded-lg p-2">
+                <div class="flex items-center justify-between bg-slate-700/30 rounded-lg p-3">
                     <div class="flex items-center gap-2">
-                        <span class="text-lg">${p.icon}</span>
-                        <span class="font-semibold">${p.name}</span>
+                        <span class="text-2xl">${p.icon}</span>
+                        <span class="font-semibold text-base">${p.name}</span>
                     </div>
-                    <div class="text-xs text-slate-400">
+                    <div class="text-sm text-slate-400">
                         高度: ${p.altitude}° | 方位: ${p.azimuth}° | 等級: ${p.magnitude}
                     </div>
                 </div>
@@ -404,9 +404,9 @@ export function calculateMilkyWayVisibility(observerDate, observerLat, observerL
             container.innerHTML = `
                 <div class="bg-slate-700/30 rounded-lg p-3">
                     <div class="text-slate-400 text-center">
-                        <div class="text-lg mb-1">🌅</div>
-                        <div>銀河中心は地平線下です</div>
-                        <div class="text-xs mt-1">高度: ${gcHorizon.altitude.toFixed(1)}°</div>
+                        <div class="text-2xl mb-1">🌅</div>
+                        <div class="text-base">銀河中心は地平線下です</div>
+                        <div class="text-sm mt-1">高度: ${gcHorizon.altitude.toFixed(1)}°</div>
                     </div>
                 </div>
             `;
@@ -424,22 +424,22 @@ export function calculateMilkyWayVisibility(observerDate, observerLat, observerL
             else direction = '北西';
 
             container.innerHTML = `
-                <div class="bg-slate-700/30 rounded-lg p-3 space-y-3">
+                <div class="bg-slate-700/30 rounded-lg p-3 space-y-4">
                     <!-- 視認性スコア -->
                     <div class="text-center">
                         <div class="text-2xl font-bold ${rankColor} mb-1">
                             ${rankIcon} ${rank}
                         </div>
-                        <div class="text-3xl font-bold text-white">
+                        <div class="text-4xl font-bold text-white">
                             ${visibilityScore.toFixed(0)}点
                         </div>
-                        <div class="text-xs text-slate-400 mt-1">天の川視認性スコア</div>
+                        <div class="text-sm text-slate-400 mt-1">天の川視認性スコア</div>
                     </div>
 
                     <!-- 銀河中心の位置 -->
-                    <div class="border-t border-slate-600 pt-2">
-                        <div class="text-xs text-slate-300 mb-1">🎯 銀河中心の位置（いて座A*）</div>
-                        <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="border-t border-slate-600 pt-3">
+                        <div class="text-sm text-slate-300 mb-2 font-bold">🎯 銀河中心の位置（いて座A*）</div>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
                             <div class="bg-slate-800/50 rounded p-2">
                                 <div class="text-slate-400">高度</div>
                                 <div class="text-white font-semibold">${gcHorizon.altitude.toFixed(1)}°</div>
@@ -452,28 +452,28 @@ export function calculateMilkyWayVisibility(observerDate, observerLat, observerL
                     </div>
 
                     <!-- 月の影響 -->
-                    <div class="border-t border-slate-600 pt-2">
-                        <div class="text-xs text-slate-300 mb-1">🌙 月明かりの影響</div>
-                        <div class="text-xs space-y-1">
+                    <div class="border-t border-slate-600 pt-3">
+                        <div class="text-sm text-slate-300 mb-2 font-bold">🌙 月明かりの影響</div>
+                        <div class="text-sm space-y-1">
                             <div class="flex justify-between">
                                 <span class="text-slate-400">月齢:</span>
-                                <span class="text-white">${moonData.age}日 (${moonPhase.toFixed(0)}%照)</span>
+                                <span class="text-white font-medium">${moonData.age}日 (${moonPhase.toFixed(0)}%照)</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-slate-400">月の高度:</span>
-                                <span class="text-white">${moonHorizon.altitude.toFixed(1)}°</span>
+                                <span class="text-white font-medium">${moonHorizon.altitude.toFixed(1)}°</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-slate-400">角距離:</span>
-                                <span class="text-white">${angularDistance.toFixed(0)}°</span>
+                                <span class="text-white font-medium">${angularDistance.toFixed(0)}°</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- 観測アドバイス -->
-                    <div class="border-t border-slate-600 pt-2">
-                        <div class="text-xs text-slate-300 mb-1">💡 アドバイス</div>
-                        <div class="text-xs text-slate-400 leading-relaxed">
+                    <div class="border-t border-slate-600 pt-3">
+                        <div class="text-sm text-slate-300 mb-2 font-bold">💡 アドバイス</div>
+                        <div class="text-sm text-slate-400 leading-relaxed">
                             ${visibilityScore >= 80 ? '絶好の天の川撮影日和です！ISO3200、F2.8、15-25秒の露出がおすすめ。' :
                               visibilityScore >= 60 ? '天の川の撮影が可能です。月明かりに注意しながら撮影してください。' :
                               visibilityScore >= 40 ? '天の川の主要部分は見えますが、淡い部分は見えにくいかもしれません。' :
@@ -611,54 +611,58 @@ export function calculateAtmosphericConditions(humidity, visibility, windSpeed, 
 
         // HTMLを生成
         container.innerHTML = `
-            <div class="bg-slate-700/30 rounded-lg p-3 space-y-3">
+            <div class="bg-slate-700/30 rounded-lg p-3 space-y-4">
                 <!-- 総合評価 -->
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-slate-800/50 rounded-lg p-3">
-                        <div class="text-xs text-slate-400 mb-1">大気透明度</div>
-                        <div class="text-2xl font-bold ${transColor}">${transparencyScore}</div>
-                        <div class="text-sm ${transColor} mt-1">${transIcon} ${transRank}</div>
+                        <div class="text-sm text-slate-400 mb-1">大気透明度</div>
+                        <div class="text-3xl font-bold ${transColor}">${transparencyScore}</div>
+                        <div class="text-base font-bold ${transColor} mt-1">${transIcon} ${transRank}</div>
                     </div>
                     <div class="bg-slate-800/50 rounded-lg p-3">
-                        <div class="text-xs text-slate-400 mb-1">シーイング</div>
-                        <div class="text-2xl font-bold ${seeingColor}">${seeingScore}</div>
-                        <div class="text-sm ${seeingColor} mt-1">${seeingRank}</div>
+                        <div class="text-sm text-slate-400 mb-1">シーイング</div>
+                        <div class="text-3xl font-bold ${seeingColor}">${seeingScore}</div>
+                        <div class="text-base font-bold ${seeingColor} mt-1">${seeingRank}</div>
                     </div>
                 </div>
 
                 <!-- 詳細データ -->
-                <div class="border-t border-slate-600 pt-2">
-                    <div class="text-xs text-slate-300 mb-2">📊 気象条件</div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="flex justify-between">
+                <div class="border-t border-slate-600 pt-3">
+                    <div class="text-sm text-slate-300 mb-2 font-bold">📊 気象条件</div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div class="flex justify-between border-b border-slate-700/50 pb-1">
                             <span class="text-slate-400">湿度:</span>
-                            <span class="text-white">${humidity}%</span>
+                            <span class="text-white font-medium">${humidity}%</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between border-b border-slate-700/50 pb-1">
                             <span class="text-slate-400">視程:</span>
-                            <span class="text-white">${visibility}km</span>
+                            <span class="text-white font-medium">${visibility}km</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between border-b border-slate-700/50 pb-1">
                             <span class="text-slate-400">風速:</span>
-                            <span class="text-white">${windSpeed.toFixed(1)}m/s</span>
+                            <span class="text-white font-medium">${windSpeed.toFixed(1)}m/s</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between border-b border-slate-700/50 pb-1">
                             <span class="text-slate-400">気圧:</span>
-                            <span class="text-white">${pressure.toFixed(0)}hPa</span>
+                            <span class="text-white font-medium">${pressure.toFixed(0)}hPa</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- 用途別アドバイス -->
-                <div class="border-t border-slate-600 pt-2">
-                    <div class="text-xs text-slate-300 mb-2">💡 用途別アドバイス</div>
-                    <div class="space-y-2 text-xs">
-                        <div class="bg-slate-800/30 rounded p-2">
-                            <div class="text-slate-300 font-semibold mb-1">🪐 惑星観測</div>
+                <div class="border-t border-slate-600 pt-3">
+                    <div class="text-sm text-slate-300 mb-2 font-bold">💡 用途別アドバイス</div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-slate-800/30 rounded-xl p-3 border border-slate-700/30">
+                            <div class="text-slate-300 font-bold mb-1 flex items-center gap-2">
+                                <span class="text-base">🪐</span> 惑星観測
+                            </div>
                             <div class="text-slate-400 leading-relaxed">${planetAdvice}</div>
                         </div>
-                        <div class="bg-slate-800/30 rounded p-2">
-                            <div class="text-slate-300 font-semibold mb-1">🌌 星雲・銀河観測</div>
+                        <div class="bg-slate-800/30 rounded-xl p-3 border border-slate-700/30">
+                            <div class="text-slate-300 font-bold mb-1 flex items-center gap-2">
+                                <span class="text-base">🌌</span> 星雲・銀河観測
+                            </div>
                             <div class="text-slate-400 leading-relaxed">${dsoAdvice}</div>
                         </div>
                     </div>
@@ -802,14 +806,14 @@ export function calculateExposure() {
         const resultsDiv = document.getElementById('exposure-results');
         resultsDiv.classList.remove('hidden');
 
-        let resultHTML = '<div class="space-y-3">';
+        let resultHTML = '<div class="space-y-4">';
 
         // 推奨露出時間
         resultHTML += `
-            <div class="bg-gradient-to-r from-pink-500/20 to-purple-500/20 p-3 rounded-lg border border-pink-500/30">
-                <div class="text-xs text-slate-300 mb-1">推奨露出時間</div>
-                <div class="text-2xl font-bold text-white">${exposureTime < 1 ? '1/' + Math.round(1/exposureTime) : exposureTime}秒</div>
-                <div class="text-xs text-slate-400 mt-1">範囲: ${minExposure < 1 ? '1/' + Math.round(1/minExposure) : minExposure}秒 〜 ${maxExposure < 1 ? '1/' + Math.round(1/maxExposure) : maxExposure}秒</div>
+            <div class="bg-gradient-to-r from-pink-500/20 to-purple-500/20 p-4 rounded-xl border border-pink-500/30 shadow-lg">
+                <div class="text-sm text-slate-300 mb-2 font-bold uppercase tracking-wider">推奨露出時間</div>
+                <div class="text-4xl font-bold text-white mb-1 tracking-tight">${exposureTime < 1 ? '1/' + Math.round(1/exposureTime) : exposureTime}秒</div>
+                <div class="text-sm text-slate-400 font-medium font-mono">範囲: ${minExposure < 1 ? '1/' + Math.round(1/minExposure) : minExposure}秒 〜 ${maxExposure < 1 ? '1/' + Math.round(1/maxExposure) : maxExposure}秒</div>
             </div>
         `;
 
@@ -818,13 +822,13 @@ export function calculateExposure() {
             const isoList = recommendedISO.join(', ');
             const currentISOMatch = recommendedISO.includes(iso);
             resultHTML += `
-                <div class="flex items-start gap-2">
-                    <i data-lucide="settings" class="w-4 h-4 text-slate-400 mt-0.5"></i>
+                <div class="flex items-start gap-3 bg-slate-800/40 p-3 rounded-xl border border-slate-700/50">
+                    <i data-lucide="settings" class="w-6 h-6 text-slate-400 mt-0.5"></i>
                     <div class="flex-1">
-                        <div class="text-xs text-slate-300">推奨ISO感度</div>
-                        <div class="text-sm ${currentISOMatch ? 'text-green-400' : 'text-yellow-400'}">
+                        <div class="text-sm text-slate-300 font-bold mb-1">推奨ISO感度</div>
+                        <div class="text-base font-bold ${currentISOMatch ? 'text-green-400' : 'text-yellow-400'}">
                             ${isoList}
-                            ${currentISOMatch ? ' ✓' : ' (現在: ' + iso + ')'}
+                            ${currentISOMatch ? ' <span class="text-xs bg-green-500/20 px-2 py-0.5 rounded ml-1">✓ 設定中</span>' : ' <span class="text-xs text-slate-400 font-normal">(現在: ' + iso + ')</span>'}
                         </div>
                     </div>
                 </div>
@@ -835,21 +839,21 @@ export function calculateExposure() {
         if (targetType !== 'planet' && targetType !== 'moon') {
             const totalMinutes = Math.round(totalExposure / 60);
             resultHTML += `
-                <div class="flex items-start gap-2">
-                    <i data-lucide="layers" class="w-4 h-4 text-slate-400 mt-0.5"></i>
+                <div class="flex items-start gap-3 bg-slate-800/40 p-3 rounded-xl border border-slate-700/50">
+                    <i data-lucide="layers" class="w-6 h-6 text-slate-400 mt-0.5"></i>
                     <div class="flex-1">
-                        <div class="text-xs text-slate-300">推奨スタック枚数</div>
-                        <div class="text-sm text-white">${stackCount}枚 (総露出時間: 約${totalMinutes}分)</div>
+                        <div class="text-sm text-slate-300 font-bold mb-1">推奨スタック枚数</div>
+                        <div class="text-base text-white font-bold">${stackCount}枚 <span class="text-sm text-slate-400 font-normal">(総露出時間: 約${totalMinutes}分)</span></div>
                     </div>
                 </div>
             `;
         } else {
             resultHTML += `
-                <div class="flex items-start gap-2">
-                    <i data-lucide="video" class="w-4 h-4 text-slate-400 mt-0.5"></i>
+                <div class="flex items-start gap-3 bg-slate-800/40 p-3 rounded-xl border border-slate-700/50">
+                    <i data-lucide="video" class="w-6 h-6 text-slate-400 mt-0.5"></i>
                     <div class="flex-1">
-                        <div class="text-xs text-slate-300">推奨撮影方法</div>
-                        <div class="text-sm text-white">動画撮影 (${stackCount}+フレーム)</div>
+                        <div class="text-sm text-slate-300 font-bold mb-1">推奨撮影方法</div>
+                        <div class="text-base text-white font-bold">動画撮影 (${stackCount}+フレーム)</div>
                     </div>
                 </div>
             `;
@@ -857,28 +861,28 @@ export function calculateExposure() {
 
         // アドバイス
         if (advice.length > 0) {
-            resultHTML += '<div class="border-t border-slate-600 pt-2 mt-2">';
-            resultHTML += '<div class="text-xs text-slate-300 font-semibold mb-2">撮影アドバイス</div>';
-            resultHTML += '<div class="space-y-1">';
+            resultHTML += '<div class="border-t border-slate-600 pt-3 mt-4">';
+            resultHTML += '<div class="text-sm text-slate-300 font-bold mb-3 flex items-center gap-2"><i data-lucide="lightbulb" class="w-4 h-4 text-yellow-400"></i> 撮影アドバイス</div>';
+            resultHTML += '<div class="space-y-2">';
             advice.forEach(adv => {
-                resultHTML += `<div class="text-xs text-slate-300">${adv}</div>`;
+                resultHTML += `<div class="text-sm text-slate-300 bg-slate-800/20 p-2 rounded-lg leading-relaxed">${adv}</div>`;
             });
             resultHTML += '</div></div>';
         }
 
         // 撮影設定サマリー
         resultHTML += `
-            <div class="border-t border-slate-600 pt-2 mt-2">
-                <div class="text-xs text-slate-300 font-semibold mb-2">設定サマリー</div>
-                <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="border-t border-slate-600 pt-3 mt-4">
+                <div class="text-sm text-slate-300 font-bold mb-3 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-4 h-4 text-blue-400"></i> 設定サマリー</div>
+                <div class="grid grid-cols-2 gap-3 text-sm bg-slate-900/40 p-3 rounded-xl">
                     <div class="text-slate-400">焦点距離</div>
-                    <div class="text-white">${focalLength}mm (35mm換算: ${Math.round(effectiveFocalLength)}mm)</div>
-                    <div class="text-slate-400">F値</div>
-                    <div class="text-white">F${aperture}</div>
-                    <div class="text-slate-400">ISO感度</div>
-                    <div class="text-white">ISO ${iso}</div>
-                    <div class="text-slate-400">赤道儀</div>
-                    <div class="text-white">${trackingMount === 'none' ? 'なし' : trackingMount === 'basic' ? 'ポータブル' : '高精度'}</div>
+                    <div class="text-white font-medium">${focalLength}mm <span class="text-xs text-slate-500">(35mm換算: ${Math.round(effectiveFocalLength)}mm)</span></div>
+                    <div class="text-slate-400 border-t border-slate-800/50 pt-1">F値</div>
+                    <div class="text-white font-medium border-t border-slate-800/50 pt-1">F${aperture}</div>
+                    <div class="text-slate-400 border-t border-slate-800/50 pt-1">ISO感度</div>
+                    <div class="text-white font-medium border-t border-slate-800/50 pt-1">ISO ${iso}</div>
+                    <div class="text-slate-400 border-t border-slate-800/50 pt-1">赤道儀</div>
+                    <div class="text-white font-medium border-t border-slate-800/50 pt-1">${trackingMount === 'none' ? 'なし' : trackingMount === 'basic' ? 'ポータブル' : '高精度'}</div>
                 </div>
             </div>
         `;
@@ -912,24 +916,24 @@ export function updateMeteorShowers(targetDate) {
 
     const container = document.getElementById('meteor-showers');
     if (relevantShowers.length === 0) {
-        container.innerHTML = '<div class="text-slate-400">今後30日以内に極大を迎える流星群はありません</div>';
+        container.innerHTML = '<div class="text-slate-400 text-base">今後30日以内に極大を迎える流星群はありません</div>';
     } else {
         container.innerHTML = relevantShowers.map(shower => {
             const isPeak = currentDateStr === shower.peakStart || currentDateStr === shower.peakEnd;
             const showerDateStr = shower.peakStart.replace('-', '/');
             return `
-                <div class="bg-slate-700/30 rounded-lg p-2 ${isPeak ? 'border-l-2 border-yellow-400' : ''}">
-                    <div class="flex items-center justify-between">
-                        <span class="font-semibold ${isPeak ? 'text-yellow-300' : ''}">${shower.name}</span>
-                        <span class="text-xs text-slate-400">${showerDateStr} 極大</span>
+                <div class="bg-slate-700/30 rounded-xl p-3 ${isPeak ? 'border-l-4 border-yellow-400' : ''}">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-bold text-base ${isPeak ? 'text-yellow-300' : 'text-white'}">${shower.name}</span>
+                        <span class="text-sm text-slate-400 font-mono">${showerDateStr} 極大</span>
                     </div>
-                    <div class="text-xs text-slate-400 mt-1">
-                        ${shower.rate} | ${shower.note}
+                    <div class="text-sm text-slate-300 leading-relaxed">
+                        <span class="text-blue-300 font-semibold">${shower.rate}</span> | ${shower.note}
                     </div>
-                    ${isPeak ? '<div class="text-xs text-yellow-300 mt-1">🌟 本日が極大日です！</div>' : ''}
+                    ${isPeak ? '<div class="text-base text-yellow-300 mt-2 font-bold animate-pulse">🌟 本日が極大日です！</div>' : ''}
                 </div>
             `;
-        }).join('');
+        }).join('<div class="h-2"></div>');
     }
 }
 export function getSeason(date = new Date()) {
@@ -982,19 +986,19 @@ export function updateRecommendedObjects(moonAge) {
     };
 
     container.innerHTML = `
-        <div class="mb-3 p-2 bg-slate-700/50 rounded-lg">
-            <div class="text-xs text-slate-300">
-                <span class="font-semibold text-cyan-400">${seasonNames[season]}の観測対象</span>
-                <span class="text-slate-400">/ ${moonPhaseText}</span>
+        <div class="mb-4 p-3 bg-slate-700/50 rounded-xl border border-slate-600/50">
+            <div class="text-sm text-slate-300">
+                <span class="font-bold text-cyan-400 text-base">${seasonNames[season]}の観測対象</span>
+                <span class="text-slate-400 block mt-1">${moonPhaseText}</span>
             </div>
         </div>
         ${recommendations.map(rec => `
-            <div class="bg-slate-700/30 rounded-lg p-2 mb-2">
-                <div class="flex items-center justify-between">
-                    <span class="font-semibold">${rec.name}</span>
-                    <span class="text-xs bg-green-600/30 text-green-300 px-2 py-0.5 rounded">${rec.type}</span>
+            <div class="bg-slate-700/30 rounded-xl p-3 mb-3 border border-slate-700/30">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="font-bold text-base text-white">${rec.name}</span>
+                    <span class="text-sm bg-green-600/30 text-green-300 px-2.5 py-1 rounded-lg font-medium">${rec.type}</span>
                 </div>
-                <div class="text-xs text-slate-400 mt-1">${rec.reason}</div>
+                <div class="text-sm text-slate-400 leading-relaxed">${rec.reason}</div>
             </div>
         `).join('')}
     `;
@@ -1607,7 +1611,7 @@ export function updateAstronomicalEvents(targetDate) {
 
         // 表示
         if (futureEvents.length === 0) {
-            container.innerHTML = '<div class="text-slate-400 text-xs">今後180日間に予定されている月食・日食はありません。</div>';
+            container.innerHTML = '<div class="text-slate-400 text-base">今後180日間に予定されている月食・日食はありません。</div>';
         } else {
             // Tailwind CDNでは動的クラス生成ができないため、固定クラスを使用
             const colorStyles = {
@@ -1623,18 +1627,18 @@ export function updateAstronomicalEvents(targetDate) {
                 window.eclipseEvents[index] = event.rawData;
 
                 return `
-                    <div class="${style.bg} rounded-lg p-2 cursor-pointer hover:bg-opacity-80 transition-all border border-transparent hover:border-${event.color}-500"
+                    <div class="${style.bg} rounded-xl p-3 cursor-pointer hover:bg-opacity-80 transition-all border border-transparent hover:border-${event.color}-500 mb-2"
                          onclick="openEclipseDetailModal(window.eclipseEvents[${index}], '${event.type}')">
-                        <div class="flex items-center justify-between">
-                            <span class="font-semibold ${style.text}">${event.icon} ${event.type}</span>
-                            <span class="text-xs ${style.text}">${event.timeText}</span>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-base ${style.text}">${event.icon} ${event.type}</span>
+                            <span class="text-sm font-bold ${style.text} bg-white/10 px-2 py-1 rounded">${event.timeText}</span>
                         </div>
-                        <div class="text-xs text-slate-400 mt-1">${event.time}</div>
-                        ${event.duration ? `<div class="text-xs text-slate-300 mt-1">⏱️ ${event.duration}</div>` : ''}
-                        ${event.note ? `<div class="text-xs text-slate-400 mt-1">📍 ${event.note}</div>` : ''}
-                        ${event.daysUntil <= 30 ? '<div class="text-xs text-yellow-300 mt-1">⭐ 近日開催</div>' : ''}
-                        <div class="text-xs text-slate-500 mt-2 flex items-center gap-1">
-                            <i data-lucide="info" class="w-3 h-3"></i>
+                        <div class="text-base text-slate-200 font-mono">${event.time}</div>
+                        ${event.duration ? `<div class="text-sm text-slate-300 mt-2">⏱️ ${event.duration}</div>` : ''}
+                        ${event.note ? `<div class="text-sm text-slate-400 mt-1">📍 ${event.note}</div>` : ''}
+                        ${event.daysUntil <= 30 ? '<div class="text-sm text-yellow-300 mt-2 font-bold">⭐ 近日開催</div>' : ''}
+                        <div class="text-sm text-slate-500 mt-3 flex items-center gap-1">
+                            <i data-lucide="info" class="w-4 h-4"></i>
                             <span>クリックして詳細を表示</span>
                         </div>
                     </div>
